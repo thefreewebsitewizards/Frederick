@@ -6,7 +6,7 @@ import ProductForm from "./ProductForm"
 function AdminPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const navigate = useNavigate()
-  const themeStyle: CSSProperties = {
+  const themeStyle = {
     "--color-primary": "#840bda",
     "--color-background-light": "#FAF9F6",
     "--color-background-dark": "#1b1022",
@@ -15,7 +15,7 @@ function AdminPage() {
     "--color-slate-custom": "#475569",
     "--color-parchment": "#fdfbf7",
     "--font-display": "Inter, sans-serif",
-  }
+  } as CSSProperties
 
   return (
     <div

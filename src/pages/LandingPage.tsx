@@ -1,4 +1,15 @@
+import type { MouseEvent } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { featuredProducts } from "../data/products"
+import { addToCart } from "../utils/cart"
+
 function LandingPage() {
+  const navigate = useNavigate()
+  const handleAddToCart = (event: MouseEvent<HTMLButtonElement>, productId: string, option: string) => {
+    event.stopPropagation()
+    addToCart({ productId, quantity: 1, option })
+    navigate("/cart")
+  }
   return (
     <div className="flex flex-col">
       <section className="relative w-full">
@@ -19,11 +30,17 @@ function LandingPage() {
               Preserving the art of traditional archery with ethically sourced woods and centuries-old techniques.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-4">
-              <button className="flex items-center gap-2 justify-center rounded-lg h-12 px-8 bg-primary hover:bg-[#3a0063] text-white text-base font-bold tracking-wide transition-all transform hover:scale-105 shadow-lg shadow-primary/30">
+              <button
+                className="flex items-center gap-2 justify-center rounded-lg h-12 px-8 bg-primary hover:bg-[#3a0063] text-white text-base font-bold tracking-wide transition-all transform hover:scale-105 shadow-lg shadow-primary/30"
+                onClick={() => navigate("/products")}
+              >
                 <span>Explore Our Bows</span>
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
-              <button className="flex items-center justify-center rounded-lg h-12 px-8 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 text-base font-bold tracking-wide transition-all">
+              <button
+                className="flex items-center justify-center rounded-lg h-12 px-8 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 text-base font-bold tracking-wide transition-all"
+                onClick={() => navigate("/about")}
+              >
                 Our Story
               </button>
             </div>
@@ -65,83 +82,53 @@ function LandingPage() {
               <span className="text-primary font-bold uppercase tracking-wider text-xs">Shop Collection</span>
               <h2 className="text-3xl md:text-4xl font-bold text-[#160c1d] dark:text-white">Featured Models</h2>
             </div>
-            <a className="hidden md:flex items-center gap-1 text-primary font-bold hover:underline" href="#">
+            <Link className="hidden md:flex items-center gap-1 text-primary font-bold hover:underline" to="/products">
               View All <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
-            </a>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="group flex flex-col bg-background-light dark:bg-[#25162e] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="h-64 overflow-hidden relative bg-gray-200">
-                <div
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                  data-alt="Traditional recurve bow made of maple and fiberglass on a dark background"
-                  style={{
-                    backgroundImage:
-                      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCIyI3j_6rnF3ZmC0Qdt-GznQqtLHZaL_J-1Y5RGDdpWrS6wz0TOQ7FSCyHBiXxLSrSxdxUgqdp0OQXwJWW52KW64HIIeHm_-E-WbX5g5Ew0sfEtMps2137nhqGYtGx-0vsm0vZUx7K-Kzep1TbTcpW2tmGPic0ibHfA5P5I1RM_ycUMAbSaFefaROZlA5q_OzAyVcmgl3yD0cJoeq6ZvoEq0JhFAX2rKBHqHXR7Sb4dtV2Mm5CjiEynigCM12rFxzFsTefXFtAhdg")',
-                  }}
-                ></div>
-              </div>
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-[#160c1d] dark:text-white">The Timber Wolf</h3>
-                <p className="text-sm text-[#160c1d]/60 dark:text-[#f7f5f8]/60 mt-1">60&quot; Recurve • Maple Core</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">$650.00</span>
-                  <button className="text-[#160c1d] dark:text-white hover:text-primary dark:hover:text-primary">
-                    <span className="material-symbols-outlined">add_shopping_cart</span>
-                  </button>
+            {featuredProducts.slice(0, 3).map((product, index) => (
+              <div
+                className="group flex flex-col bg-background-light dark:bg-[#25162e] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                key={product.id}
+                onClick={() => navigate(`/product-details/${product.id}`)}
+              >
+                <div className="h-64 overflow-hidden relative bg-gray-200">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
+                    data-alt={product.name}
+                    style={{
+                      backgroundImage: `url("${product.image}")`,
+                    }}
+                  ></div>
+                  {index === 2 ? (
+                    <div className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded">
+                      Best Seller
+                    </div>
+                  ) : null}
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <h3 className="text-xl font-bold text-[#160c1d] dark:text-white">{product.name}</h3>
+                  <p className="text-sm text-[#160c1d]/60 dark:text-[#f7f5f8]/60 mt-1">{product.summary}</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-lg font-bold text-primary">${product.price.toFixed(2)}</span>
+                    <button
+                      className="text-[#160c1d] dark:text-white hover:text-primary dark:hover:text-primary"
+                      onClick={(event) =>
+                        handleAddToCart(event, product.id, product.drawWeightOptions[0] ?? "Standard")
+                      }
+                    >
+                      <span className="material-symbols-outlined">add_shopping_cart</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="group flex flex-col bg-background-light dark:bg-[#25162e] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="h-64 overflow-hidden relative bg-gray-200">
-                <div
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                  data-alt="Longbow with dark walnut finish resting against a tree"
-                  style={{
-                    backgroundImage:
-                      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD23eXzSpC2r9jU2884knX_-ESk6JMUhK0i0OKJvxT_9NrbUt64gke4bpE8m1Ouo1TRgOMlxZuI4CUzgN1YuyQTA8Go-do3OdZc_mXdyTkdVncI7NWpflXFnNrqTPqGm-bM5EFHSV7AUANz54EuxMugOhOPqzCxLrwi_NNXJK4x7lcr1ix4ULcdFUIq1qukQFUKqWmc4hCloUbkkNWwQIUx1G6foh7Do8hcaeHUEx5kfdfqG2-S1iBzMyEkRi4L5Ksy3xWk5gnYqQQ")',
-                  }}
-                ></div>
-              </div>
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-[#160c1d] dark:text-white">The Night Stalker</h3>
-                <p className="text-sm text-[#160c1d]/60 dark:text-[#f7f5f8]/60 mt-1">64&quot; Longbow • Walnut/Carbon</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">$725.00</span>
-                  <button className="text-[#160c1d] dark:text-white hover:text-primary dark:hover:text-primary">
-                    <span className="material-symbols-outlined">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="group flex flex-col bg-background-light dark:bg-[#25162e] rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
-              <div className="h-64 overflow-hidden relative bg-gray-200">
-                <div
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                  data-alt="Close up of custom recurve bow riser with intricate wood grain"
-                  style={{
-                    backgroundImage:
-                      'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA4zoj9j90iy1jd16-cA5oWCAAwY4R3dKGEYOgsVZTIkNNWoMq1cbUSLqFCtA1arug8XN87E-RzaoWY3HkQiZmeAYGVtlIVkFLpTeCbNBod4f0CM3g5ogTwqA5Y7FwvvsjGpDZA4345C49J1c4XKkGRRiHb4iNHcX0rAQWb1GDzkP-wawktU4kYO-0gvvUI-O_ltmfs-aDFyvnsZ4fE1Q6dl7zjeG_cCRaXzvlVW5qfduA_pm78BiTi-HqXDLZVeGX4a7juFf0hSCU")',
-                  }}
-                ></div>
-                <div className="absolute top-3 left-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded">Best Seller</div>
-              </div>
-              <div className="p-5 flex flex-col flex-1">
-                <h3 className="text-xl font-bold text-[#160c1d] dark:text-white">The Heritage</h3>
-                <p className="text-sm text-[#160c1d]/60 dark:text-[#f7f5f8]/60 mt-1">58&quot; Recurve • Exotic Woods</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-lg font-bold text-primary">$895.00</span>
-                  <button className="text-[#160c1d] dark:text-white hover:text-primary dark:hover:text-primary">
-                    <span className="material-symbols-outlined">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
           <div className="flex md:hidden justify-center mt-8">
-            <a className="flex items-center gap-1 text-primary font-bold hover:underline" href="#">
+            <Link className="flex items-center gap-1 text-primary font-bold hover:underline" to="/products">
               View All Models <span className="material-symbols-outlined text-sm">arrow_right_alt</span>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -171,9 +158,12 @@ function LandingPage() {
                 With over 40 years of experience in bending wood to his will, Freddie brings a heritage of craftsmanship to every piece he touches. Starting in a small garage in Oregon, his dedication to the "old ways" has made Black Eagle bows sought after by traditional archers worldwide.
               </p>
               <div className="pt-4">
-                <a className="inline-flex items-center text-[#160c1d] dark:text-white font-bold hover:text-primary transition-colors border-b-2 border-primary/30 hover:border-primary pb-0.5" href="#">
+                <Link
+                  className="inline-flex items-center text-[#160c1d] dark:text-white font-bold hover:text-primary transition-colors border-b-2 border-primary/30 hover:border-primary pb-0.5"
+                  to="/about"
+                >
                   Read Freddie&apos;s Full Story
-                </a>
+                </Link>
               </div>
             </div>
           </div>

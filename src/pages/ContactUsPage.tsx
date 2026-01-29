@@ -1,4 +1,30 @@
+import { useState, type FormEvent } from "react"
+
 function ContactUsPage() {
+  const [formValues, setFormValues] = useState({
+    name: "",
+    email: "",
+    model: "",
+    service: "General Inquiry",
+    message: "",
+  })
+  const [submissionMessage, setSubmissionMessage] = useState("")
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!formValues.name || !formValues.email || !formValues.message) {
+      setSubmissionMessage("Please complete your name, email, and message before sending.")
+      return
+    }
+    setSubmissionMessage("Message sent. We will reply within 24 hours.")
+    setFormValues({
+      name: "",
+      email: "",
+      model: "",
+      service: "General Inquiry",
+      message: "",
+    })
+  }
   return (
     <div className="font-display bg-background-light dark:bg-background-dark text-[#160c1d] dark:text-white overflow-x-hidden antialiased flex flex-col min-h-screen">
       <main className="flex-grow flex justify-center w-full px-4 sm:px-6 py-8 md:py-12">
@@ -13,26 +39,53 @@ function ContactUsPage() {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-4">
             <div className="lg:col-span-7 bg-white dark:bg-[#251530] p-6 md:p-8 rounded-xl rustic-border">
-              <form className="flex flex-col gap-6">
+              <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                {submissionMessage ? (
+                  <div className="rounded-lg border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary font-semibold">
+                    {submissionMessage}
+                  </div>
+                ) : null}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2">
                     <span className="text-[#160c1d] dark:text-gray-200 text-base font-semibold">Your Name</span>
-                    <input className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans" placeholder="Enter your full name" type="text" />
+                    <input
+                      className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans"
+                      onChange={(event) => setFormValues((prev) => ({ ...prev, name: event.target.value }))}
+                      placeholder="Enter your full name"
+                      type="text"
+                      value={formValues.name}
+                    />
                   </label>
                   <label className="flex flex-col gap-2">
                     <span className="text-[#160c1d] dark:text-gray-200 text-base font-semibold">Email Address</span>
-                    <input className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans" placeholder="name@example.com" type="email" />
+                    <input
+                      className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans"
+                      onChange={(event) => setFormValues((prev) => ({ ...prev, email: event.target.value }))}
+                      placeholder="name@example.com"
+                      type="email"
+                      value={formValues.email}
+                    />
                   </label>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2">
                     <span className="text-[#160c1d] dark:text-gray-200 text-base font-semibold">Bow Model <span className="font-normal text-sm opacity-60">(Optional)</span></span>
-                    <input className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans" placeholder="e.g., 1965 Bear Kodiak" type="text" />
+                    <input
+                      className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 focus:ring-0 focus:outline-none transition-shadow font-sans"
+                      onChange={(event) => setFormValues((prev) => ({ ...prev, model: event.target.value }))}
+                      placeholder="e.g., 1965 Bear Kodiak"
+                      type="text"
+                      value={formValues.model}
+                    />
                   </label>
                   <label className="flex flex-col gap-2">
                     <span className="text-[#160c1d] dark:text-gray-200 text-base font-semibold">Service Required</span>
                     <div className="relative">
-                      <select className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 pr-10 focus:ring-0 focus:outline-none transition-shadow appearance-none font-sans cursor-pointer">
+                      <select
+                        className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white h-12 px-4 pr-10 focus:ring-0 focus:outline-none transition-shadow appearance-none font-sans cursor-pointer"
+                        onChange={(event) => setFormValues((prev) => ({ ...prev, service: event.target.value }))}
+                        value={formValues.service}
+                      >
                         <option>General Inquiry</option>
                         <option>Custom Bow Commission</option>
                         <option>Structural Repair</option>
@@ -45,10 +98,15 @@ function ContactUsPage() {
                 </div>
                 <label className="flex flex-col gap-2">
                   <span className="text-[#160c1d] dark:text-gray-200 text-base font-semibold">How can we help?</span>
-                  <textarea className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white min-h-[160px] p-4 focus:ring-0 focus:outline-none transition-shadow resize-y font-sans" placeholder="Describe the issue or your custom request details..."></textarea>
+                  <textarea
+                    className="rustic-input w-full rounded-lg border border-[#decdea] dark:border-[#4a355e] bg-[#faf8fc] dark:bg-[#1b0f23] text-[#160c1d] dark:text-white min-h-[160px] p-4 focus:ring-0 focus:outline-none transition-shadow resize-y font-sans"
+                    onChange={(event) => setFormValues((prev) => ({ ...prev, message: event.target.value }))}
+                    placeholder="Describe the issue or your custom request details..."
+                    value={formValues.message}
+                  ></textarea>
                 </label>
                 <div className="pt-2">
-                  <button className="group relative w-full md:w-auto md:min-w-[200px] flex items-center justify-center gap-2 bg-primary hover:bg-[#3d006b] text-white font-bold py-3.5 px-8 rounded-lg transition-all active:scale-[0.98] shadow-md hover:shadow-lg" type="button">
+                  <button className="group relative w-full md:w-auto md:min-w-[200px] flex items-center justify-center gap-2 bg-primary hover:bg-[#3d006b] text-white font-bold py-3.5 px-8 rounded-lg transition-all active:scale-[0.98] shadow-md hover:shadow-lg" type="submit">
                     <span>Send Message</span>
                     <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">send</span>
                   </button>

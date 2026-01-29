@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react"
 
 function CartPage() {
-  const themeStyle: CSSProperties = {
+  const themeStyle = {
     "--color-primary": "#7311d4",
     "--color-background-light": "#f7f6f8",
     "--color-background-dark": "#191022",
@@ -11,7 +11,7 @@ function CartPage() {
     "--color-text-light": "#e0dce8",
     "--font-display": "Newsreader, serif",
     "--font-serif": "Newsreader, serif",
-  }
+  } as CSSProperties
 
   return (
     <div

@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react"
+import { Link } from "react-router-dom"
 
 function AboutUsPage() {
-  const themeStyle: CSSProperties = {
+  const themeStyle = {
     "--color-background-light": "#fdfbf7",
-  }
+  } as CSSProperties
 
   return (
     <div
@@ -36,9 +37,9 @@ function AboutUsPage() {
                 </h2>
               </div>
               <div className="flex gap-4 pt-4">
-                <button className="flex items-center justify-center rounded-md h-12 px-6 bg-primary text-white text-base font-bold shadow-md hover:bg-[#3d006a] transition-all">
+                <Link className="flex items-center justify-center rounded-md h-12 px-6 bg-primary text-white text-base font-bold shadow-md hover:bg-[#3d006a] transition-all" to="/products">
                   View Freddie&apos;s Collection
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -168,12 +169,12 @@ function AboutUsPage() {
             <h3 className="text-2xl font-bold text-text-brown dark:text-white">Own a Piece of History</h3>
             <p className="text-text-brown-light dark:text-gray-400 max-w-md">Every bow is a unique commission. Explore current stock or contact us for a custom build.</p>
             <div className="flex gap-4 flex-wrap justify-center">
-              <button className="flex items-center justify-center rounded-md h-12 px-8 bg-primary text-white text-base font-bold shadow-md hover:bg-[#3d006a] transition-all">
+              <Link className="flex items-center justify-center rounded-md h-12 px-8 bg-primary text-white text-base font-bold shadow-md hover:bg-[#3d006a] transition-all" to="/products">
                 Shop Available Bows
-              </button>
-              <button className="flex items-center justify-center rounded-md h-12 px-8 border-2 border-[#3E2723] dark:border-white/20 text-[#3E2723] dark:text-white text-base font-bold hover:bg-[#3E2723] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all">
+              </Link>
+              <Link className="flex items-center justify-center rounded-md h-12 px-8 border-2 border-[#3E2723] dark:border-white/20 text-[#3E2723] dark:text-white text-base font-bold hover:bg-[#3E2723] hover:text-white dark:hover:bg-white dark:hover:text-black transition-all" to="/contact">
                 Contact Workshop
-              </button>
+              </Link>
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ function App() {
   return (
     <div className="bg-background-light dark:bg-background-dark text-[#160c1d] dark:text-[#f7f5f8] font-display overflow-x-hidden flex flex-col min-h-screen">
       {isAdminRoute ? null : <Navbar />}
-      <main className="flex-1">
+      <main className={`flex-1 ${isAdminRoute ? "" : "pt-16"}`}>
         <Outlet />
       </main>
       {isAdminRoute ? null : <Footer />}

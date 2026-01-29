@@ -7,7 +7,7 @@ type ProductFormProps = {
 
 function ProductForm({ variant = "page", onClose }: ProductFormProps) {
   const isModal = variant === "modal"
-  const themeStyle: CSSProperties = {
+  const themeStyle = {
     "--color-primary": "#7311d4",
     "--color-primary-dark": "#5e0eb0",
     "--color-background-light": "#FDFCF5",
@@ -15,7 +15,7 @@ function ProductForm({ variant = "page", onClose }: ProductFormProps) {
     "--color-border-dark": "#2c2a27",
     "--color-paper-shadow": "rgba(44, 42, 39, 0.1)",
     "--font-display": "Newsreader, serif",
-  }
+  } as CSSProperties
 
   const wrapperClass = isModal
     ? "w-full"
