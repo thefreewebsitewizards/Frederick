@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Handcrafted Bow Details - Heritage Bows</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Theme Configuration -->
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7311d4",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                        "parchment": "#fdfbf7",
+                        "chocolate": "#4a3b32",
+                        "rope": "#d4c5b0",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "serif": ["Newsreader", "serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom rope divider style */
+        .rope-divider {
+            height: 4px;
+            background-image: repeating-linear-gradient(45deg, #d4c5b0 0, #d4c5b0 10px, transparent 10px, transparent 20px),
+                              repeating-linear-gradient(-45deg, #d4c5b0 0, #d4c5b0 10px, transparent 10px, transparent 20px);
+            background-size: 20px 4px;
+            opacity: 0.6;
+        }
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 3.5rem;
+            line-height: 0.8;
+            padding-right: 0.5rem;
+            padding-top: 0.1rem;
+            font-weight: bold;
+            color: #7311d4;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#140d1b] dark:text-white font-display">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Header -->
+<div class="w-full bg-[#faf8fc] border-b border-[#ede7f3]">
+<div class="layout-container flex justify-center w-full">
+<div class="flex flex-col w-full max-w-[1280px]">
+<header class="flex items-center justify-between whitespace-nowrap px-4 md:px-10 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-[#140d1b]">
+<div class="size-8 text-primary">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C12.95 4 4 12.95 4 24C4 35.05 12.95 44 24 44C35.05 44 44 35.05 44 24C44 12.95 35.05 4 24 4ZM24 40C15.16 40 8 32.84 8 24C8 15.16 15.16 8 24 8C32.84 8 40 15.16 40 24C40 32.84 32.84 40 24 40Z" fill="currentColor"></path>
+<path d="M24 10C24 10 20 20 18 24C16 28 20 34 24 34C28 34 32 28 30 24C28 20 24 10 24 10Z" fill="currentColor" opacity="0.6"></path>
+</svg>
+</div>
+<h2 class="text-[#140d1b] text-xl font-bold leading-tight tracking-[-0.015em]">Heritage Bows</h2>
+</div>
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-[#140d1b] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Bows</a>
+<a class="text-[#140d1b] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Arrows</a>
+<a class="text-[#140d1b] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Accessories</a>
+<a class="text-[#140d1b] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Workshops</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 md:gap-8">
+<div class="hidden md:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-[#ede7f3]">
+<div class="text-primary flex items-center justify-center pl-3 pr-2">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full min-w-0 flex-1 bg-transparent border-none text-[#140d1b] placeholder:text-[#734c9a] focus:ring-0 px-0 text-sm" placeholder="Search"/>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg size-10 bg-[#ede7f3] text-[#140d1b] hover:bg-[#e0d6e9] transition-colors">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</button>
+<button class="flex items-center justify-center rounded-lg size-10 bg-[#ede7f3] text-[#140d1b] hover:bg-[#e0d6e9] transition-colors">
+<span class="material-symbols-outlined text-[20px]">person</span>
+</button>
+</div>
+</div>
+</header>
+</div>
+</div>
+</div>
+<!-- Breadcrumbs -->
+<div class="layout-container flex justify-center w-full bg-[#faf8fc]">
+<div class="layout-content-container flex flex-col w-full max-w-[1280px] px-4 md:px-10">
+<div class="flex flex-wrap gap-2 py-4 items-center">
+<a class="text-[#734c9a] text-sm font-medium leading-normal hover:underline" href="#">Home</a>
+<span class="text-[#734c9a] text-sm font-medium leading-normal">/</span>
+<a class="text-[#734c9a] text-sm font-medium leading-normal hover:underline" href="#">Handcrafted Bows</a>
+<span class="text-[#734c9a] text-sm font-medium leading-normal">/</span>
+<span class="text-[#140d1b] text-sm font-medium leading-normal">The Highland Yew Longbow</span>
+</div>
+</div>
+</div>
+<!-- Main Product Section -->
+<div class="layout-container flex grow justify-center w-full py-6 md:py-10 bg-[#faf8fc]">
+<div class="layout-content-container flex flex-col lg:flex-row gap-10 w-full max-w-[1280px] px-4 md:px-10">
+<!-- Left Column: Images -->
+<div class="flex flex-col w-full lg:w-3/5 gap-4">
+<div class="w-full aspect-[4/3] rounded-xl overflow-hidden shadow-sm border border-[#ede7f3]">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover transform hover:scale-105 transition-transform duration-700" data-alt="Close up of a handcrafted wooden longbow resting on a mossy rock in a forest" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCYHMPO1UjOoPJROVfy57B7Yw4U6o8tFKHHq7b8HYqzQBNeFqRdmBH5D6ZkfxliC74lNLrCJN3neSQykmo6AuMojjo0nAU_I3eSftA9BcaY3almwToeWbxx0UQSK86NkZRvKwD71tT7cSOlGuSvsM25gcqvfCnTQL_87cTPOI53V44jSoyJeFqNuns73xgVO-YoOF85rEbTesGWPy-MN75qbqKKQPWtuM0WOszRfJW5EszUTIVOVpjLhKRvH3-WiHdNpHRK9ym5EuM");'>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<div class="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-primary">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Detailed view of the bow handle wrapped in leather" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCojb62glcqiRqNz7UBZzXPq31TeOzUkCyvoCypk3VWkfVNdgbght2demhljwWbWmVHN26-zU3cIshTzWOQIfuQAVBEjW7_PIm5uzLCSVrMKxzsY7XEsJnJw9M3XgRGQahLOHzDxrKPBKo1t1IMLITcKydLMaS_vQl-Q-3CIImouQzRReiszz3HLLhMbcKW6t3-NcmXwMX4SHLywCDGMKnRKiqNJX4ScGkb2CuukCrz4vdJ9JxDN1jDqOxjYNoLPwP2Z7TGVvvO5bU");'></div>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="The bow unstrung showing the wood grain texture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDjx6Zl1j2oGGTzyvSb3gIKhHpZPRIK1yqvOnsp_PVJ2aTQF-6FE8uSeFjKDDqheN-RpvinUZ31Wnp6bidZHYSsP5as-CSZ_2xFt3ApdzrPy6weRTZkl3rwaXmD6L5o3H6abFdCgdx7x0oJBHtwHYYNOQ422zVNojOlW5MI_yMWKxkBkK8QvI0Jf_qJvTqhCMGx3nNsPxzA5sHg7amLEXFpRPQAYZNI1lzOGP_0ZiW-frOHoDJmfZduuMCQimx-TpNniHKo8lkoPnQ");'></div>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Archer holding the bow in a traditional stance" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCZdoLeorOlfXLdlQGI6xnZ1VJ80VbkJTerTVV-uMNC8NWIIOGFvmcGTrS__6u6gNYRMA1fK0bhCz09iKQm1wnFwVHlSgvAq0h0t3Yp6cdTPIvKo1Bh8mFIxzWmdc6uZ3HUag6j1sCUCIrZLhXY0pvYfrt6YWws0BpC7WxZRUgCmjH5YXMDn1HuGlk5jIBnctHeZRg3gp94nQ7jukkdYmgsaTOZOiJR8d-OCLPcXk4oTxjftehajUiYdGmHKrFZsqCsWADH1Eur67Q");'></div>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="The bow tip detail with horn nock" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDi1x-W8C5Y_OC89JqLjLDA-FHvgvwjc8PmKE9YbNq_ZbTkAhTcBhRIcTo12QAjtpchouZxeZkBnFJlXTtx8M9j7SyO-ySEkS490l0M6f3UnVcBcZ7o6GImVd080CGX3-nuxrCAFk85Hj4pQkj-WpD6Nfqof82zU02dwzbTGlsqBN9YzwbnkROsYbFkvdME4zR4xZTk6N8CQtvTilk0oYwZHY3hUgSR9WAifrBIQ7tQD42LSByTIZHWtnUy0T1lFrEp7VaA879IMnI");'></div>
+</div>
+</div>
+</div>
+<!-- Right Column: Product Info -->
+<div class="flex flex-col w-full lg:w-2/5">
+<div class="bg-parchment p-8 rounded-lg border border-[#e3dac9] shadow-sm relative overflow-hidden group">
+<!-- Subtle texture overlay -->
+<div class="absolute inset-0 opacity-10 pointer-events-none mix-blend-multiply" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDseb7quKIzgjsa8wlBUS6SS83kOIu-jjrBXK5e_B4XaqkZW194-bIuwXeCgPZPLWWkbfr7D-eYzgZYDP_9Hz0Xyh2T-fqXTMJ0MZoUgA08GpsC6QfaamhWoALcgONj8_9DYJYgWytlvCmAIrH_z3PcHdY87T4ZcvpDwuNgonO3LYY5ZxKX4hIKp50csklQejyGnJFW8rr-22I50hinT4aoDH0kkG7-5tZh5vKABdPYiElHyT2sXe9vOal2yQosfcRs1Pwwc3G-_40')"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="flex justify-between items-start mb-2">
+<span class="text-sm font-bold tracking-widest uppercase text-chocolate/60">English Longbow</span>
+<div class="flex gap-1 text-yellow-600">
+<span class="material-symbols-outlined text-[18px] fill-current">star</span>
+<span class="material-symbols-outlined text-[18px] fill-current">star</span>
+<span class="material-symbols-outlined text-[18px] fill-current">star</span>
+<span class="material-symbols-outlined text-[18px] fill-current">star</span>
+<span class="material-symbols-outlined text-[18px] fill-current">star_half</span>
+</div>
+</div>
+<h1 class="text-[#140d1b] tracking-tight text-4xl font-bold leading-tight mb-4 font-serif text-chocolate">The Highland Yew Longbow</h1>
+<p class="text-3xl font-medium text-chocolate mb-6">$850.00</p>
+<div class="rope-divider w-full mb-6"></div>
+<p class="text-[#4a3b32] text-lg leading-relaxed mb-8 font-normal">
+                                Ideally suited for target archery and re-enactment, the Highland Yew is handcrafted from premium Pacific Yew, renowned for its elasticity and strength. Each bow is tillered to perfection, offering a smooth draw and powerful release reminiscent of the great war bows of history.
+                            </p>
+<!-- Specifications Grid -->
+<div class="grid grid-cols-2 gap-4 mb-8">
+<div class="bg-[#f5f1e8] p-4 rounded border border-[#e3dac9]">
+<span class="block text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-1">Draw Weight</span>
+<span class="text-lg font-semibold text-chocolate">45 - 60 lbs</span>
+</div>
+<div class="bg-[#f5f1e8] p-4 rounded border border-[#e3dac9]">
+<span class="block text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-1">Length</span>
+<span class="text-lg font-semibold text-chocolate">72 Inches</span>
+</div>
+<div class="bg-[#f5f1e8] p-4 rounded border border-[#e3dac9] col-span-2">
+<span class="block text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-1">Material</span>
+<span class="text-lg font-semibold text-chocolate">Aged Pacific Yew &amp; White Ash</span>
+</div>
+</div>
+<div class="flex flex-col gap-4 mt-auto">
+<div class="flex gap-4">
+<div class="w-1/3">
+<label class="block text-xs font-bold text-chocolate/60 uppercase mb-2">Quantity</label>
+<div class="relative flex items-center">
+<button class="absolute left-0 w-8 h-full text-chocolate hover:bg-black/5 rounded-l">-</button>
+<input class="w-full text-center border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2" readonly="" type="text" value="1"/>
+<button class="absolute right-0 w-8 h-full text-chocolate hover:bg-black/5 rounded-r">+</button>
+</div>
+</div>
+<div class="w-2/3">
+<label class="block text-xs font-bold text-chocolate/60 uppercase mb-2">Draw Weight Option</label>
+<select class="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2">
+<option>45 lbs (Target)</option>
+<option>50 lbs (Hunting)</option>
+<option>60 lbs (War Bow)</option>
+</select>
+</div>
+</div>
+<button class="mt-4 flex w-full cursor-pointer items-center justify-center rounded-lg h-14 bg-primary hover:bg-[#600eb3] text-white gap-3 text-lg font-bold leading-normal tracking-wide shadow-md transition-all transform hover:-translate-y-0.5">
+<span class="material-symbols-outlined">shopping_cart</span>
+                                    Add to Quiver
+                                </button>
+<p class="text-xs text-center text-chocolate/50 mt-2 italic">Crafted to order. Expect 3-4 weeks for delivery.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Craftsman's Notes Section -->
+<div class="layout-container flex justify-center w-full py-16 bg-[#faf8fc]">
+<div class="layout-content-container max-w-[960px] px-4 md:px-10">
+<div class="relative border-t border-b border-[#e3dac9] py-12">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#faf8fc] px-4">
+<span class="material-symbols-outlined text-4xl text-rope">history_edu</span>
+</div>
+<h3 class="text-3xl font-bold text-center text-chocolate mb-10 font-serif">Craftsman's Notes</h3>
+<div class="grid md:grid-cols-2 gap-12 text-[#4a3b32] text-lg leading-relaxed font-serif">
+<div class="drop-cap">
+                            The design of this longbow is steeped in the martial traditions of the 14th century. While modern materials have their place, there is a soul in Yew wood that fiberglass cannot replicate. We source our timber from high-altitude groves where the slow growth creates tight, dense grain rings—essential for the snap and power of a true self-bow.
+                        </div>
+<div>
+<p class="mb-4">
+                                Every bow is worked by hand, following the natural grain of the stave rather than forcing a shape upon it. This ensures that the weapon is not only beautiful but durable. The horn nocks are hand-carved from water buffalo horn, polished to a glass-like finish to protect the string loops from abrasion.
+                            </p>
+<p class="italic text-primary/80">
+                                "A bow is life in tension." — Master Bowyer, Elden Thorne
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Simple Footer -->
+<footer class="bg-[#191022] text-white py-12">
+<div class="layout-container flex justify-center w-full">
+<div class="max-w-[1280px] px-10 w-full flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-4">
+<div class="size-8 text-white/80">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 4C12.95 4 4 12.95 4 24C4 35.05 12.95 44 24 44C35.05 44 44 35.05 44 24C44 12.95 35.05 4 24 4ZM24 40C15.16 40 8 32.84 8 24C8 15.16 15.16 8 24 8C32.84 8 40 15.16 40 24C40 32.84 32.84 40 24 40Z" fill="currentColor"></path>
+<path d="M24 10C24 10 20 20 18 24C16 28 20 34 24 34C28 34 32 28 30 24C28 20 24 10 24 10Z" fill="currentColor" opacity="0.6"></path>
+</svg>
+</div>
+<span class="text-xl font-bold font-serif">Heritage Bows</span>
+</div>
+<div class="flex gap-8 text-sm text-white/60">
+<a class="hover:text-white transition-colors" href="#">Shipping &amp; Returns</a>
+<a class="hover:text-white transition-colors" href="#">Bow Care</a>
+<a class="hover:text-white transition-colors" href="#">Artisan Bio</a>
+</div>
+<div class="text-sm text-white/40">
+                        © 2023 Heritage Bows. All rights reserved.
+                    </div>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Heritage Bows - Admin Product Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#840bda",
+                        "background-light": "#FAF9F6", // Warm off-white parchment
+                        "background-dark": "#1b1022",
+                        "rustic-dark": "#1e1b18", // Deep warm grey/brown for sidebar
+                        "chocolate": "#4E342E",
+                        "slate-custom": "#475569",
+                        "parchment": "#fdfbf7",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased overflow-hidden">
+<div class="flex h-screen w-full">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 flex flex-col justify-between bg-rustic-dark border-r border-stone-800/50">
+<div>
+<!-- Brand Header -->
+<div class="h-20 flex items-center px-6 border-b border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">api</span>
+</div>
+<div>
+<h1 class="text-white text-base font-bold leading-tight tracking-wide">Heritage Bows</h1>
+<p class="text-stone-400 text-xs font-normal">Admin Panel</p>
+</div>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-1 p-4">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-stone-300 hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-stone-400 group-hover:text-white">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/20 text-white border border-primary/30 shadow-sm relative overflow-hidden group" href="#">
+<div class="absolute inset-y-0 left-0 w-1 bg-primary rounded-r"></div>
+<span class="material-symbols-outlined text-primary fill-current">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-stone-300 hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-stone-400 group-hover:text-white">shopping_cart</span>
+<span class="text-sm font-medium">Orders</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-stone-300 hover:bg-white/5 hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-stone-400 group-hover:text-white">group</span>
+<span class="text-sm font-medium">Customers</span>
+</a>
+</nav>
+</div>
+<!-- User Profile / Settings -->
+<div class="p-4 border-t border-white/10">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-stone-300 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<div class="bg-center bg-no-repeat bg-cover rounded-full w-8 h-8 border border-stone-600" data-alt="Admin user profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC085wp4yXiKK0HqJEirxFHDturdw66BxPlWcRDyolaQ-dLs6WwBUcj45tZlS4q4U9Syd5luYybaIaL-7piPm3YWecgyVn0gc9HXuJkXCrRYmwQersNoqvCWtwxsg-GwqPh903N55FPL_ZiMEgFWHZ3DmqgqJ2o7ZlkjPCpls2uyZ4X4vHq4y8bI-ag752sRcPnGagNJtoVsekZk9HF4dd9oHFad-6Ly2J_33B-KS3BrU40Jg2tCeHT4F8Tl5OO0jhyB9Yg09lTZb0");'></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">Eleanor Woods</p>
+<p class="text-xs text-stone-500 truncate">Store Manager</p>
+</div>
+<span class="material-symbols-outlined text-stone-500 text-[20px]">settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<!-- Page Heading & Actions -->
+<header class="flex-shrink-0 px-8 py-8 flex flex-wrap justify-between items-end gap-4">
+<div class="flex flex-col gap-2">
+<h2 class="text-slate-900 dark:text-white text-3xl font-bold tracking-tight">Product Management</h2>
+<p class="text-slate-500 dark:text-slate-400 text-sm max-w-xl">Manage your handcrafted inventory, track stock levels, and organize product listings.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg shadow-lg shadow-primary/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="text-sm font-bold tracking-wide">Add New Product</span>
+</button>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto px-8 pb-8">
+<div class="w-full max-w-[1400px] flex flex-col gap-6">
+<!-- Search and Filters Bar -->
+<div class="flex flex-col md:flex-row gap-4 justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm border border-stone-200 dark:border-slate-700">
+<!-- Search -->
+<div class="relative w-full md:w-96 group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-stone-400 group-focus-within:text-primary">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 border-none bg-stone-50 dark:bg-slate-900 rounded-lg text-sm text-slate-900 dark:text-white placeholder-stone-400 focus:ring-2 focus:ring-primary/50 transition-shadow" placeholder="Search by name, SKU, or category..." type="text"/>
+</div>
+<!-- Category Chips -->
+<div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 px-2 no-scrollbar">
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-slate-800 text-white text-xs font-semibold shadow-sm">All Products</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-stone-100 dark:bg-slate-700 text-stone-600 dark:text-slate-300 hover:bg-stone-200 dark:hover:bg-slate-600 text-xs font-medium transition-colors">Bows</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-stone-100 dark:bg-slate-700 text-stone-600 dark:text-slate-300 hover:bg-stone-200 dark:hover:bg-slate-600 text-xs font-medium transition-colors">Strings</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-stone-100 dark:bg-slate-700 text-stone-600 dark:text-slate-300 hover:bg-stone-200 dark:hover:bg-slate-600 text-xs font-medium transition-colors">Quivers</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-stone-100 dark:bg-slate-700 text-stone-600 dark:text-slate-300 hover:bg-stone-200 dark:hover:bg-slate-600 text-xs font-medium transition-colors">Accessories</button>
+</div>
+</div>
+<!-- Main Table Card -->
+<div class="bg-parchment dark:bg-slate-800 rounded-xl shadow-md border border-stone-200 dark:border-slate-700 overflow-hidden relative">
+<!-- Decorative top edge for parchment feel -->
+<div class="h-1 w-full bg-gradient-to-r from-stone-300 via-stone-100 to-stone-300 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600 opacity-50"></div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-stone-100/50 dark:bg-slate-900/50 border-b border-stone-200 dark:border-slate-600 text-xs uppercase tracking-wider text-stone-500 dark:text-slate-400 font-semibold">
+<th class="px-6 py-4 w-20">Image</th>
+<th class="px-6 py-4">Product Name</th>
+<th class="px-6 py-4">Category</th>
+<th class="px-6 py-4 text-right">Price</th>
+<th class="px-6 py-4">Stock Level</th>
+<th class="px-6 py-4 text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-stone-200 dark:divide-slate-700">
+<!-- Row 1 -->
+<tr class="hover:bg-white dark:hover:bg-slate-700/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="h-12 w-12 rounded-lg bg-stone-200 dark:bg-slate-600 bg-cover bg-center shadow-sm" data-alt="Traditional wooden longbow close up" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgvwPewR8Xcbsd9vlAXuuYtT_BbBYRWSZfB9OwSOpMYPEu4fBnCnf4uDqbmhsQ-Vv1CsHezPo6M2fFLVy1v3lIfosj1kQM5YDCPItzOVejG4NCgReeSGItlFcvY-8IafE6IZ9BgbAXN_Ewv7PLoNvk7GiUQjuqWRmZL2dyEC2hsZczHrkDeWnXU96gzaSPsQLCZNilhVOJF193hG0RL1CQzEO3ejNugfG2cAg5USK0Enc0YubbCi7ciaDraMya-SyY_erZgfUYmHg');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-800 dark:text-white">Longbow - The Ranger</span>
+<span class="text-xs text-stone-500 dark:text-slate-400">SKU: LB-001-RN</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                                Bow
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">$450.00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-green-600 w-[40%]"></div>
+</div>
+<span class="text-xs font-medium text-stone-600 dark:text-slate-300">12 Units</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center justify-center h-8 px-3 rounded bg-chocolate hover:bg-[#3E2723] text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Edit
+                                                </button>
+<button class="flex items-center justify-center h-8 px-3 rounded bg-slate-custom hover:bg-slate-600 text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Delete
+                                                </button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white dark:hover:bg-slate-700/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="h-12 w-12 rounded-lg bg-stone-200 dark:bg-slate-600 bg-cover bg-center shadow-sm" data-alt="Twisted bow string detail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCONDc6D4m2cQTsyKHNpN8Iw2f3c7q7amsJOYXErdzA4dsP_8ZvnK9tTfCQdEmtDwOP6DfnV6nWbvna5m8buODD3EOR3s4DeuXB_FiHu5aqNAh6McNHNOpRl6n4p-852DyPXYNRUuQFcX24JM4VAxlJCFLsjfUEZtT5qo1fjkWBXbJB_QYquIXnSTk0VL6XoGTGainBLHWdorMZkVWsudJ0DKeG_SF1q-8CRpqo_4QVcWUXWcnJWN6sDPZQwMwvlZaoy3uVfyXb1dM');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-800 dark:text-white">Flemish Twist String</span>
+<span class="text-xs text-stone-500 dark:text-slate-400">SKU: ST-042-FL</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                                                String
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">$25.00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-green-600 w-[85%]"></div>
+</div>
+<span class="text-xs font-medium text-stone-600 dark:text-slate-300">50 Units</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center justify-center h-8 px-3 rounded bg-chocolate hover:bg-[#3E2723] text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Edit
+                                                </button>
+<button class="flex items-center justify-center h-8 px-3 rounded bg-slate-custom hover:bg-slate-600 text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Delete
+                                                </button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white dark:hover:bg-slate-700/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="h-12 w-12 rounded-lg bg-stone-200 dark:bg-slate-600 bg-cover bg-center shadow-sm" data-alt="Recurve bow handle detail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAmsT0i0kvncXL7ivSCYlpbuJdOpkCcu-D0avS5fqnk8EurpRbBA284r6Jraq2y4WXrNTq-spiOAcXTgTghm1RB928aMh7jsG2oKfful8FwkeS7gsoaTe2K-cja3HqLnmx25NL_SFb4xwLbpoGZqpRCms0Xs014aQE8pGiE04X_nJCzAowXhuGdhJnC5gkOhs-j0QM7yaO6b294U8pgOgjQw95muRfoi94k7g3crR_PexoYDIwrCWSYa5-nZ1f4QsOU7JPEQapIz1g');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-800 dark:text-white">Recurve - The Hunter</span>
+<span class="text-xs text-stone-500 dark:text-slate-400">SKU: RC-009-HN</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                                Bow
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">$600.00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-red-500 w-[10%]"></div>
+</div>
+<span class="text-xs font-medium text-red-600">3 Units</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center justify-center h-8 px-3 rounded bg-chocolate hover:bg-[#3E2723] text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Edit
+                                                </button>
+<button class="flex items-center justify-center h-8 px-3 rounded bg-slate-custom hover:bg-slate-600 text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Delete
+                                                </button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-white dark:hover:bg-slate-700/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="h-12 w-12 rounded-lg bg-stone-200 dark:bg-slate-600 bg-cover bg-center shadow-sm" data-alt="Leather back quiver with arrows" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDpOyvpflJdsXm881TP5YTTrnQxmTotmUmKw7T441T5MbcoH-sBemE_G3LgikM30wnHO-tr9beloWUZEoQ1ovpUpkMs5XK3khyO9TVJkDEkNNDuasU1uH0xG0RWAbuRTOfURxPt4ijI6TPGCglXr_DwpPsYts-TjI6ss1JiZpo2F8NTozJZI69Rn_hqH0ynVuBaf4cJVWiPQkpReczpefgHlCQQdCF4aRCCvZExcQIjkSEqMrFazPKZeF2XW61CzD2qotv-Uuv0_QM');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-800 dark:text-white">Leather Back Quiver</span>
+<span class="text-xs text-stone-500 dark:text-slate-400">SKU: QV-102-LB</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-700 border border-stone-200">
+                                                Accessory
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">$120.00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400 w-[20%]"></div>
+</div>
+<span class="text-xs font-medium text-orange-600">8 Units</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center justify-center h-8 px-3 rounded bg-chocolate hover:bg-[#3E2723] text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Edit
+                                                </button>
+<button class="flex items-center justify-center h-8 px-3 rounded bg-slate-custom hover:bg-slate-600 text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Delete
+                                                </button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-white dark:hover:bg-slate-700/50 transition-colors group">
+<td class="px-6 py-4">
+<div class="h-12 w-12 rounded-lg bg-stone-200 dark:bg-slate-600 bg-cover bg-center shadow-sm" data-alt="Small tin of bowstring wax" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDjFJXItF8b_DhLNzMMiqmzZVEAc_0Vo2aqY_KqwwQAHgTrYZiO6b7qvwDvq-vAAsDjqA7asquFkiWEgeQeR4bWeFQQCE42gBSweTeWybXTV3IP2wyFFcHeM6HeR2PiD7dqMtAtRHxwMfwgK3FFOe_K0PdEp8XE2PG5AiVnkF2EOoByfmtbi0O-Oo4WlXxSMfSbflzlV7faoljzvgjZHHBiFcLa_oCkbAU14NZHLcdpTl1RToC1pekt2U-YS8WqmioRzVZXPSETAHk');"></div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-slate-800 dark:text-white">Bowstring Wax</span>
+<span class="text-xs text-stone-500 dark:text-slate-400">SKU: MT-505-WX</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                                                Maintenance
+                                            </span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-200">$15.00</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 h-1.5 bg-stone-200 rounded-full overflow-hidden">
+<div class="h-full bg-green-600 w-full"></div>
+</div>
+<span class="text-xs font-medium text-stone-600 dark:text-slate-300">100 Units</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center justify-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center justify-center h-8 px-3 rounded bg-chocolate hover:bg-[#3E2723] text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Edit
+                                                </button>
+<button class="flex items-center justify-center h-8 px-3 rounded bg-slate-custom hover:bg-slate-600 text-white text-xs font-medium transition-colors shadow-sm">
+                                                    Delete
+                                                </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer / Pagination -->
+<div class="px-6 py-4 border-t border-stone-200 dark:border-slate-700 flex items-center justify-between bg-stone-50/50 dark:bg-slate-900/50">
+<p class="text-xs text-stone-500 dark:text-slate-400">Showing <span class="font-semibold text-slate-800 dark:text-white">1-5</span> of <span class="font-semibold text-slate-800 dark:text-white">48</span> products</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs font-medium text-stone-600 bg-white border border-stone-300 rounded hover:bg-stone-50 disabled:opacity-50 shadow-sm" disabled="">Previous</button>
+<button class="px-3 py-1 text-xs font-medium text-stone-600 bg-white border border-stone-300 rounded hover:bg-stone-50 shadow-sm">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
