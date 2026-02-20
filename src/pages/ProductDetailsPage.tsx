@@ -1,14 +1,41 @@
 import type { CSSProperties } from "react"
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { getProductById, products, type Product } from "../data/products"
+import { type Product, useStoreProduct } from "../data/products"
 import { addToCart } from "../utils/cart"
 
 function ProductDetailsPage() {
   const { productId } = useParams()
-  const product = getProductById(productId) ?? products[0]
+  const { product: remoteProduct, loading } = useStoreProduct(productId)
 
-  return <ProductDetailsContent key={product.id} product={product} />
+  if (loading && !remoteProduct) {
+    return (
+      <div className="bg-background-light dark:bg-background-dark text-[#140d1b] dark:text-white font-display">
+        <div className="layout-container flex justify-center w-full py-24">
+          <div className="layout-content-container w-full max-w-[1280px] px-4 md:px-10">
+            <div className="text-[#734c9a] text-lg font-medium">Loading product…</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!remoteProduct) {
+    return (
+      <div className="bg-background-light dark:bg-background-dark text-[#140d1b] dark:text-white font-display">
+        <div className="layout-container flex justify-center w-full py-24">
+          <div className="layout-content-container w-full max-w-[1280px] px-4 md:px-10">
+            <div className="text-[#734c9a] text-lg font-medium">Product not found.</div>
+            <Link className="mt-4 inline-flex text-[#734c9a] text-sm font-medium hover:underline" to="/products">
+              Back to products
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return <ProductDetailsContent key={remoteProduct.id} product={remoteProduct} />
 }
 
 function ProductDetailsContent({ product }: { product: Product }) {

@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
+import { useCart } from "../utils/cart"
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const cartItems = useCart()
+  const cartCount = useMemo(() => cartItems.reduce((total, item) => total + item.quantity, 0), [cartItems])
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full border-b border-[#e5ded0] bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm shadow-sm">
@@ -30,7 +33,11 @@ function Navbar() {
           </button>
           <Link className="flex items-center justify-center rounded-lg h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary transition-colors relative" to="/cart">
             <span className="material-symbols-outlined text-[20px]">shopping_cart</span>
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary"></span>
+            {cartCount > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">
+                {cartCount}
+              </span>
+            ) : null}
           </Link>
         </div>
       </div>

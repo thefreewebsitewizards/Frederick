@@ -1,10 +1,13 @@
 import type { MouseEvent } from "react"
+import { useMemo } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { featuredProducts } from "../data/products"
+import { useStoreProducts } from "../data/products"
 import { addToCart } from "../utils/cart"
 
 function LandingPage() {
   const navigate = useNavigate()
+  const { products } = useStoreProducts()
+  const featuredProducts = useMemo(() => products.filter((product) => product.featured), [products])
   const handleAddToCart = (event: MouseEvent<HTMLButtonElement>, productId: string, option: string) => {
     event.stopPropagation()
     addToCart({ productId, quantity: 1, option })

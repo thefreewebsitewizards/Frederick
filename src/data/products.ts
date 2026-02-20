@@ -1,3 +1,25 @@
+import { useEffect, useState } from "react"
+import { initializeApp, type FirebaseApp } from "firebase/app"
+import { getAuth, signInWithEmailAndPassword, signOut, type Auth } from "firebase/auth"
+import { getFunctions, httpsCallable, type Functions } from "firebase/functions"
+import {
+  addDoc,
+  collection,
+  type DocumentData,
+  deleteDoc,
+  doc,
+  getDoc,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  type QueryDocumentSnapshot,
+  type QuerySnapshot,
+  serverTimestamp,
+  type Firestore,
+  updateDoc,
+} from "firebase/firestore"
+
 export type Product = {
   id: string
   name: string
@@ -9,12 +31,15 @@ export type Product = {
   images: string[]
   badge?: string
   featured?: boolean
+  stockLevel?: number
   typeLabel: string
   drawWeight: string
   length: string
   material: string
   drawWeightOptions: string[]
 }
+
+export const productCategories = ["Recurve Bows", "Longbows", "Strings", "Accessories"] as const
 
 export const products: Product[] = [
   {
@@ -384,3 +409,487 @@ export const productsById = products.reduce<Record<string, Product>>((accumulato
   accumulator[product.id] = product
   return accumulator
 }, {})
+
+type FirestoreProduct = Omit<Product, "id"> & {
+  createdAt?: unknown
+  updatedAt?: unknown
+}
+
+let cachedFirebaseApp: FirebaseApp | null = null
+let cachedFirestore: Firestore | null = null
+let cachedAuth: Auth | null = null
+let cachedFunctions: Functions | null = null
+
+const isBrowser = typeof window !== "undefined"
+
+const getEnvValue = (key: string) => {
+  if (!isBrowser) return ""
+  const env = import.meta.env as Record<string, string | undefined>
+  return env[key] ?? ""
+}
+
+export const getConfiguredStoreId = () => {
+  const storeId = getEnvValue("VITE_STORE_ID").trim()
+  return storeId.length > 0 ? storeId : null
+}
+
+const getFirebaseConfig = () => {
+  const apiKey = getEnvValue("VITE_FIREBASE_API_KEY")
+  const authDomain = getEnvValue("VITE_FIREBASE_AUTH_DOMAIN")
+  const projectId = getEnvValue("VITE_FIREBASE_PROJECT_ID")
+  const storageBucket = getEnvValue("VITE_FIREBASE_STORAGE_BUCKET")
+  const messagingSenderId = getEnvValue("VITE_FIREBASE_MESSAGING_SENDER_ID")
+  const appId = getEnvValue("VITE_FIREBASE_APP_ID")
+
+  if (!apiKey || !authDomain || !projectId || !storageBucket || !messagingSenderId || !appId) {
+    return null
+  }
+
+  return {
+    apiKey,
+    authDomain,
+    projectId,
+    storageBucket,
+    messagingSenderId,
+    appId,
+  }
+}
+
+export const isFirebaseConfigured = () => Boolean(getFirebaseConfig())
+
+const getFirestoreClient = () => {
+  if (!isBrowser) return null
+  if (cachedFirestore) return cachedFirestore
+
+  const config = getFirebaseConfig()
+  if (!config) return null
+
+  if (!cachedFirebaseApp) {
+    cachedFirebaseApp = initializeApp(config)
+  }
+
+  cachedFirestore = getFirestore(cachedFirebaseApp)
+  return cachedFirestore
+}
+
+const getAuthClient = () => {
+  if (!isBrowser) return null
+  if (cachedAuth) return cachedAuth
+
+  const config = getFirebaseConfig()
+  if (!config) return null
+
+  if (!cachedFirebaseApp) {
+    cachedFirebaseApp = initializeApp(config)
+  }
+
+  cachedAuth = getAuth(cachedFirebaseApp)
+  return cachedAuth
+}
+
+const getFunctionsClient = () => {
+  if (!isBrowser) return null
+  if (cachedFunctions) return cachedFunctions
+
+  const config = getFirebaseConfig()
+  if (!config) return null
+
+  if (!cachedFirebaseApp) {
+    cachedFirebaseApp = initializeApp(config)
+  }
+
+  cachedFunctions = getFunctions(cachedFirebaseApp)
+  return cachedFunctions
+}
+
+export const signInFirebaseAdmin = async (email: string, password: string) => {
+  const auth = getAuthClient()
+  if (!auth) return
+  await signInWithEmailAndPassword(auth, email, password)
+}
+
+export const signOutFirebaseAdmin = async () => {
+  const auth = getAuthClient()
+  if (!auth) return
+  await signOut(auth)
+}
+
+export const getStoreAdminEmail = async () => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) return null
+  const firestore = getFirestoreClient()
+  if (!firestore) return null
+  const storeRef = doc(firestore, "stores", storeId)
+  const snapshot = await getDoc(storeRef)
+  if (!snapshot.exists()) return null
+  const data = snapshot.data() as { adminEmail?: string }
+  const email = typeof data.adminEmail === "string" ? data.adminEmail.trim().toLowerCase() : ""
+  return email.length > 0 ? email : null
+}
+
+export const getStoreStripeConnectedAccountId = async () => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) return null
+  const firestore = getFirestoreClient()
+  if (!firestore) return null
+  const storeRef = doc(firestore, "stores", storeId)
+  const snapshot = await getDoc(storeRef)
+  if (!snapshot.exists()) return null
+  const data = snapshot.data() as { stripe?: { connectedAccountId?: string } }
+  const rawValue = data.stripe?.connectedAccountId
+  const value = typeof rawValue === "string" ? rawValue.trim() : ""
+  return value.length > 0 ? value : ""
+}
+
+export const updateStoreStripeConnectedAccountId = async (connectedAccountId: string) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const firestore = getFirestoreClient()
+  if (!firestore) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const auth = getAuthClient()
+  if (!auth?.currentUser) {
+    throw new Error("Not signed in to Firebase. Sign in from the admin page before updating settings.")
+  }
+
+  const storeRef = doc(firestore, "stores", storeId)
+  await updateDoc(storeRef, {
+    "stripe.connectedAccountId": connectedAccountId.trim(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export type CheckoutCartItem = {
+  name: string
+  price: number
+  quantity: number
+  imageUrl?: string
+}
+
+export const createCartCheckoutSession = async (
+  items: CheckoutCartItem[],
+  options?: { successUrl?: string; cancelUrl?: string },
+) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const functions = getFunctionsClient()
+  if (!functions) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  if (!isBrowser) {
+    throw new Error("Checkout is only available in the browser.")
+  }
+
+  const normalizedItems = items
+    .map((item) => {
+      const trimmedImage = item.imageUrl?.trim()
+      const safeImageUrl =
+        trimmedImage && trimmedImage.length <= 2048 && (() => {
+          try {
+            const parsed = new URL(trimmedImage)
+            if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+              return trimmedImage
+            }
+          } catch {
+            return undefined
+          }
+          return undefined
+        })()
+      return {
+        name: item.name.trim(),
+        price: item.price,
+        quantity: item.quantity,
+        imageUrl: safeImageUrl,
+      }
+    })
+    .filter((item) => item.name && Number.isFinite(item.price) && item.quantity > 0)
+
+  if (normalizedItems.length === 0) {
+    throw new Error("Cart is empty.")
+  }
+
+  const successUrl = options?.successUrl ?? `${window.location.origin}/cart?checkout=success`
+  const cancelUrl = options?.cancelUrl ?? `${window.location.origin}/cart?checkout=cancel`
+  const createCheckout = httpsCallable(functions, "createCheckoutSessionForFrederick")
+  try {
+    const response = await createCheckout({ storeId, successUrl, cancelUrl, items: normalizedItems })
+    const payload = response.data as { url?: string }
+    const url = typeof payload?.url === "string" ? payload.url : ""
+    if (!url) {
+      throw new Error("Failed to start Stripe Checkout.")
+    }
+    return url
+  } catch (error) {
+    const knownError = error as {
+      message?: string
+      code?: string
+      details?: Record<string, unknown>
+    }
+    const message = typeof knownError?.message === "string" ? knownError.message : ""
+    const details = knownError?.details ?? {}
+    const detailsMessage =
+      details && typeof details === "object" && "stripeMessage" in details && typeof details.stripeMessage === "string"
+        ? details.stripeMessage
+        : ""
+    const statusCode =
+      details && typeof details === "object" && "statusCode" in details && typeof details.statusCode === "number"
+        ? details.statusCode
+        : null
+    const responseMessage =
+      details && typeof details === "object" && "message" in details && typeof details.message === "string"
+        ? details.message
+        : ""
+    const parts = [message, responseMessage, detailsMessage].filter((part) => part && part.length > 0)
+    const composed = parts.length > 0 ? parts.join(" ") : "Stripe error while creating checkout session."
+    const suffix = statusCode ? ` (Stripe status ${statusCode})` : ""
+    throw new Error(`${composed}${suffix}`)
+  }
+}
+
+const normalizeCommaList = (value: string) =>
+  value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+
+export const buildProductFromForm = (input: {
+  name: string
+  category: Product["category"]
+  price: number
+  summary: string
+  description: string
+  badge?: string
+  featured?: boolean
+  typeLabel: string
+  drawWeight: string
+  length: string
+  material: string
+  drawWeightOptions: string
+  image: string
+  images?: string[]
+  stockLevel?: number
+}): Omit<Product, "id"> => {
+  const images = (input.images ?? []).map((item) => item.trim()).filter((item) => item.length > 0)
+  const mainImage = input.image.trim()
+  const allImages = images.length > 0 ? images : mainImage ? [mainImage] : []
+
+  return {
+    name: input.name.trim(),
+    category: input.category,
+    price: input.price,
+    summary: input.summary.trim(),
+    description: input.description.trim(),
+    image: mainImage,
+    images: allImages,
+    badge: input.badge?.trim() || undefined,
+    featured: Boolean(input.featured),
+    typeLabel: input.typeLabel.trim(),
+    drawWeight: input.drawWeight.trim(),
+    length: input.length.trim(),
+    material: input.material.trim(),
+    drawWeightOptions: normalizeCommaList(input.drawWeightOptions),
+    stockLevel: typeof input.stockLevel === "number" ? input.stockLevel : undefined,
+  }
+}
+
+export const addStoreProduct = async (product: Omit<Product, "id">) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const firestore = getFirestoreClient()
+  if (!firestore) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const auth = getAuthClient()
+  if (!auth?.currentUser) {
+    throw new Error("Not signed in to Firebase. Sign in from the admin page before saving products.")
+  }
+
+  const productsRef = collection(firestore, "stores", storeId, "products")
+  const payload: FirestoreProduct = {
+    ...product,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  }
+
+  const docRef = await addDoc(productsRef, payload)
+  return docRef.id
+}
+
+export const updateStoreProduct = async (productId: string, product: Omit<Product, "id">) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const firestore = getFirestoreClient()
+  if (!firestore) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const auth = getAuthClient()
+  if (!auth?.currentUser) {
+    throw new Error("Not signed in to Firebase. Sign in from the admin page before updating products.")
+  }
+
+  const productRef = doc(firestore, "stores", storeId, "products", productId)
+  await updateDoc(productRef, {
+    ...product,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+export const deleteStoreProduct = async (productId: string) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const firestore = getFirestoreClient()
+  if (!firestore) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const auth = getAuthClient()
+  if (!auth?.currentUser) {
+    throw new Error("Not signed in to Firebase. Sign in from the admin page before deleting products.")
+  }
+
+  const productRef = doc(firestore, "stores", storeId, "products", productId)
+  await deleteDoc(productRef)
+}
+
+const readProductsSnapshot = (snapshot: QuerySnapshot<DocumentData>) => {
+  return snapshot.docs
+    .map((docSnap: QueryDocumentSnapshot<DocumentData>) => {
+      const data = docSnap.data() as Partial<FirestoreProduct>
+      const product: Product = {
+        id: docSnap.id,
+        name: data.name ?? "",
+        category: (data.category as Product["category"]) ?? "Accessories",
+        price: typeof data.price === "number" ? data.price : 0,
+        summary: data.summary ?? "",
+        description: data.description ?? "",
+        image: data.image ?? "",
+        images: Array.isArray(data.images) ? (data.images as string[]) : [],
+        badge: typeof data.badge === "string" ? data.badge : undefined,
+        featured: Boolean(data.featured),
+        typeLabel: data.typeLabel ?? "",
+        drawWeight: data.drawWeight ?? "",
+        length: data.length ?? "",
+        material: data.material ?? "",
+        drawWeightOptions: Array.isArray(data.drawWeightOptions) ? (data.drawWeightOptions as string[]) : [],
+        stockLevel: typeof data.stockLevel === "number" ? data.stockLevel : undefined,
+      }
+      return product
+    })
+    .filter((product: Product) => product.name.trim().length > 0 && product.image.trim().length > 0)
+}
+
+export const useStoreProducts = () => {
+  const [remoteProducts, setRemoteProducts] = useState<Product[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const storeId = getConfiguredStoreId()
+    const firestore = getFirestoreClient()
+    if (!storeId || !firestore) {
+      return
+    }
+
+    const productsRef = collection(firestore, "stores", storeId, "products")
+    const productsQuery = query(productsRef, orderBy("createdAt", "desc"))
+
+    const unsubscribe = onSnapshot(
+      productsQuery,
+      (snapshot) => {
+        setError(null)
+        setRemoteProducts(readProductsSnapshot(snapshot))
+      },
+      (snapshotError) => {
+        setRemoteProducts(null)
+        setError(snapshotError instanceof Error ? snapshotError.message : "Failed to load products.")
+      },
+    )
+
+    return () => unsubscribe()
+  }, [])
+
+  return {
+    products: remoteProducts ?? [],
+    error,
+    loading: remoteProducts === null && error === null && Boolean(getConfiguredStoreId()) && Boolean(getFirestoreClient()),
+  }
+}
+
+export const useStoreProduct = (productId?: string) => {
+  const storeId = getConfiguredStoreId()
+  const firestore = getFirestoreClient()
+  const [remoteProduct, setRemoteProduct] = useState<Product | null>(null)
+  const [resolvedProductId, setResolvedProductId] = useState<string | null>(null)
+  const [remoteError, setRemoteError] = useState<{ productId: string; message: string } | null>(null)
+
+  useEffect(() => {
+    if (!productId || !storeId || !firestore) return
+
+    const docRef = doc(firestore, "stores", storeId, "products", productId)
+    void getDoc(docRef)
+      .then((snapshot) => {
+        if (!snapshot.exists()) {
+          setResolvedProductId(productId)
+          setRemoteProduct(null)
+          setRemoteError(null)
+          return
+        }
+
+        const data = snapshot.data() as Partial<FirestoreProduct>
+        const parsed: Product = {
+          id: snapshot.id,
+          name: data.name ?? "",
+          category: (data.category as Product["category"]) ?? "Accessories",
+          price: typeof data.price === "number" ? data.price : 0,
+          summary: data.summary ?? "",
+          description: data.description ?? "",
+          image: data.image ?? "",
+          images: Array.isArray(data.images) ? (data.images as string[]) : [],
+          badge: typeof data.badge === "string" ? data.badge : undefined,
+          featured: Boolean(data.featured),
+          typeLabel: data.typeLabel ?? "",
+          drawWeight: data.drawWeight ?? "",
+          length: data.length ?? "",
+          material: data.material ?? "",
+          drawWeightOptions: Array.isArray(data.drawWeightOptions) ? (data.drawWeightOptions as string[]) : [],
+          stockLevel: typeof data.stockLevel === "number" ? data.stockLevel : undefined,
+        }
+        setResolvedProductId(productId)
+        setRemoteProduct(parsed)
+        setRemoteError(null)
+      })
+      .catch((docError) => {
+        setResolvedProductId(productId)
+        setRemoteProduct(null)
+        setRemoteError({
+          productId,
+          message: docError instanceof Error ? docError.message : "Failed to load product.",
+        })
+      })
+  }, [firestore, productId, storeId])
+
+  const loading = Boolean(productId && storeId && firestore && resolvedProductId !== productId)
+  const error = remoteError && remoteError.productId === productId ? remoteError.message : null
+  const remote = resolvedProductId === productId ? remoteProduct : null
+
+  return { product: remote, error, loading }
+}

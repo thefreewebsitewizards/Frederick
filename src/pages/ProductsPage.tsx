@@ -1,12 +1,13 @@
 import type { MouseEvent } from "react"
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { products } from "../data/products"
+import { useStoreProducts } from "../data/products"
 
 const categories = ["All Products", "Recurve Bows", "Longbows", "Strings", "Accessories"] as const
 
 function ProductsPage() {
   const navigate = useNavigate()
+  const { products } = useStoreProducts()
   const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All Products")
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 4
@@ -16,7 +17,7 @@ function ProductsPage() {
       return products
     }
     return products.filter((product) => product.category === activeCategory)
-  }, [activeCategory])
+  }, [activeCategory, products])
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize))
   const safePage = Math.min(currentPage, totalPages)
@@ -127,7 +128,7 @@ function ProductsPage() {
               >
                 <span className="material-symbols-outlined text-[#160c1d] dark:text-white text-lg">chevron_left</span>
               </button>
-              {[1, 2, 3, 4].map((page) => {
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => {
                 const isActive = page === safePage
                 return (
                   <button
