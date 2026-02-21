@@ -1,8 +1,43 @@
-import type { CSSProperties } from "react"
+import type { ChangeEvent, CSSProperties } from "react"
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { createCartCheckoutSession, useStoreProducts } from "../data/products"
+import {
+  createCartCheckoutSession,
+  createOrderForFrederick,
+  getShippingRatesForFrederick,
+  type ShippingAddress,
+  type ShippingRate,
+  useStoreProducts,
+} from "../data/products"
 import { addToCart, removeFromCart, updateCartItemQuantity, useCart } from "../utils/cart"
+
+const SHIPPING_MARKUP = 1.35
+
+const toCents = (value: number) => Math.round(value * 100)
+
+const parseAmount = (rawAmount: string) => {
+  const sanitized = rawAmount.replace(/[^0-9.]+/g, "")
+  if (!sanitized) return NaN
+  return Number(sanitized)
+}
+
+const getMarkedUpAmount = (rawAmount: string) => {
+  const base = parseAmount(rawAmount)
+  if (!Number.isFinite(base) || base < 0) return 0
+  const baseCents = toCents(base)
+  const markedUpCents = Math.round(baseCents * SHIPPING_MARKUP)
+  return markedUpCents / 100
+}
+
+const getDisplayAmount = (rate: ShippingRate) => {
+  const baseSource = rate.baseAmount ?? rate.amount
+  const markedUp = getMarkedUpAmount(baseSource)
+  const parsed = parseAmount(rate.amount)
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed > markedUp ? parsed : markedUp
+  }
+  return markedUp
+}
 
 function CartPage() {
   const cartItems = useCart()
@@ -36,7 +71,29 @@ function CartPage() {
     return products.filter((product) => !inCart.has(product.id)).slice(0, 3)
   }, [cartItems, products])
   const subtotal = useMemo(() => lineItems.reduce((sum, item) => sum + item.total, 0), [lineItems])
-  const total = subtotal
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    name: "",
+    company: "",
+    street1: "",
+    street2: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "US",
+    phone: "",
+    email: "",
+  })
+  const [shipmentId, setShipmentId] = useState("")
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
+  const [selectedRateId, setSelectedRateId] = useState("")
+  const [isFetchingRates, setIsFetchingRates] = useState(false)
+  const [shippingError, setShippingError] = useState<string | null>(null)
+  const selectedRate = useMemo(
+    () => shippingRates.find((rate) => rate.rateId === selectedRateId) ?? null,
+    [selectedRateId, shippingRates],
+  )
+  const shippingAmount = selectedRate ? getDisplayAmount(selectedRate) : 0
+  const total = subtotal + (Number.isFinite(shippingAmount) ? shippingAmount : 0)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const themeStyle = {
@@ -51,11 +108,70 @@ function CartPage() {
     "--font-serif": "Newsreader, serif",
   } as CSSProperties
 
+  const handleShippingChange = (field: keyof ShippingAddress) => (
+    event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const value = event.target.value
+    setShippingAddress((prev) => ({ ...prev, [field]: value }))
+    setShippingRates([])
+    setSelectedRateId("")
+    setShipmentId("")
+    setShippingError(null)
+  }
+
+  const isShippingAddressComplete = useMemo(() => {
+    const requiredFields: (keyof ShippingAddress)[] = [
+      "name",
+      "street1",
+      "city",
+      "state",
+      "zip",
+      "country",
+      "phone",
+      "email",
+    ]
+    return requiredFields.every((field) => String(shippingAddress[field] ?? "").trim().length > 0)
+  }, [shippingAddress])
+
+  const handleFetchRates = async () => {
+    if (isFetchingRates) return
+    setShippingError(null)
+    if (!isShippingAddressComplete) {
+      setShippingError("Please complete the shipping address to get rates.")
+      return
+    }
+
+    setIsFetchingRates(true)
+    try {
+      const result = await getShippingRatesForFrederick(shippingAddress)
+      const sortedRates = [...result.rates].sort((a, b) => getDisplayAmount(a) - getDisplayAmount(b))
+      setShipmentId(result.shipmentId)
+      setShippingRates(sortedRates)
+      const fallbackRateId = sortedRates[0]?.rateId ?? ""
+      setSelectedRateId(fallbackRateId)
+    } catch (error) {
+      setShippingError(error instanceof Error ? error.message : "Unable to fetch shipping rates.")
+      setShippingRates([])
+      setSelectedRateId("")
+      setShipmentId("")
+    } finally {
+      setIsFetchingRates(false)
+    }
+  }
+
   const handleCheckout = async () => {
     if (isCheckingOut) return
     setCheckoutError(null)
     if (lineItems.length === 0) {
       setCheckoutError("Your quiver is empty.")
+      return
+    }
+    if (!isShippingAddressComplete) {
+      setCheckoutError("Please provide a shipping address.")
+      return
+    }
+    if (!selectedRateId) {
+      setCheckoutError("Please select a shipping option.")
       return
     }
 
@@ -64,14 +180,26 @@ function CartPage() {
       const items = lineItems
         .filter((lineItem) => Boolean(lineItem.product))
         .map((lineItem) => ({
+          productId: lineItem.item.productId,
           name: lineItem.title,
           price: lineItem.price,
           quantity: lineItem.item.quantity,
           imageUrl: lineItem.image,
+          option: lineItem.item.option,
+          note: lineItem.item.note,
         }))
+      const orderId = await createOrderForFrederick({
+        items,
+        customer: shippingAddress,
+        shipping: {
+          selectedRateId,
+          shipmentId: shipmentId || undefined,
+        },
+      })
       const checkoutUrl = await createCartCheckoutSession(items, {
         successUrl: `${window.location.origin}/cart?checkout=success`,
         cancelUrl: `${window.location.origin}/cart?checkout=cancel`,
+        orderId,
       })
       window.location.assign(checkoutUrl)
     } catch (error) {
@@ -214,6 +342,139 @@ function CartPage() {
               </div>
               <div className="lg:col-span-4">
                 <div className="sticky top-28 rounded-xl bg-parchment p-6 shadow-sm ring-1 ring-black/5 dark:bg-[#251b30] dark:ring-white/10 dark:shadow-2xl">
+                  <div className="mb-6">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="text-xl font-bold text-text-dark dark:text-white">Shipping Details</h2>
+                      <span className="material-symbols-outlined text-gray-400">local_shipping</span>
+                    </div>
+                    <div className="flex flex-col gap-3 text-sm">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("name")}
+                          placeholder="Full name"
+                          type="text"
+                          value={shippingAddress.name}
+                        />
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("company")}
+                          placeholder="Company (optional)"
+                          type="text"
+                          value={shippingAddress.company ?? ""}
+                        />
+                      </div>
+                      <input
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                        onChange={handleShippingChange("street1")}
+                        placeholder="Street address"
+                        type="text"
+                        value={shippingAddress.street1}
+                      />
+                      <input
+                        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                        onChange={handleShippingChange("street2")}
+                        placeholder="Apartment, suite, etc. (optional)"
+                        type="text"
+                        value={shippingAddress.street2 ?? ""}
+                      />
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("city")}
+                          placeholder="City"
+                          type="text"
+                          value={shippingAddress.city}
+                        />
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("state")}
+                          placeholder="State"
+                          type="text"
+                          value={shippingAddress.state}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("zip")}
+                          placeholder="ZIP code"
+                          type="text"
+                          value={shippingAddress.zip}
+                        />
+                        <select
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("country")}
+                          value={shippingAddress.country}
+                        >
+                          <option value="US">United States</option>
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("phone")}
+                          placeholder="Phone number"
+                          type="tel"
+                          value={shippingAddress.phone}
+                        />
+                        <input
+                          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-text-dark focus:border-primary focus:outline-none dark:border-gray-600 dark:bg-[#1f1629] dark:text-white"
+                          onChange={handleShippingChange("email")}
+                          placeholder="Email address"
+                          type="email"
+                          value={shippingAddress.email}
+                        />
+                      </div>
+                      <button
+                        className="mt-2 w-full rounded-lg border border-primary bg-white py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-transparent"
+                        disabled={!isShippingAddressComplete || isFetchingRates}
+                        onClick={handleFetchRates}
+                        type="button"
+                      >
+                        {isFetchingRates ? "Fetching rates..." : "Get Shipping Rates"}
+                      </button>
+                      {shippingError ? (
+                        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                          {shippingError}
+                        </div>
+                      ) : null}
+                      {shippingRates.length > 0 ? (
+                        <div className="flex flex-col gap-2">
+                          {shippingRates.map((rate) => (
+                            <label
+                              className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                                rate.rateId === selectedRateId
+                                  ? "border-primary bg-white text-text-dark dark:bg-[#1f1629] dark:text-white"
+                                  : "border-gray-200 bg-transparent text-gray-600 dark:border-gray-600 dark:text-gray-300"
+                              }`}
+                              key={rate.rateId}
+                            >
+                              <span className="flex flex-col">
+                                <span className="font-semibold">
+                                  {rate.provider} · {rate.serviceName}
+                                </span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {rate.estimatedDays !== null ? `${rate.estimatedDays} days` : rate.durationTerms || "Estimated delivery"}
+                                </span>
+                              </span>
+                              <span className="flex items-center gap-2">
+                                <span className="font-semibold">
+                                  ${getDisplayAmount(rate).toFixed(2)} {rate.currency}
+                                </span>
+                                <input
+                                  checked={rate.rateId === selectedRateId}
+                                  className="h-4 w-4 accent-primary"
+                                  onChange={() => setSelectedRateId(rate.rateId)}
+                                  type="radio"
+                                />
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
                   <div className="mb-6 flex items-center justify-between border-b border-gray-300 pb-4 dark:border-gray-600">
                     <h2 className="text-2xl font-bold text-text-dark dark:text-white">Order Summary</h2>
                     <span className="material-symbols-outlined text-gray-400">receipt_long</span>
@@ -225,7 +486,9 @@ function CartPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Shipping Estimate</span>
-                      <span className="italic text-gray-400">Calculated at next step</span>
+                      <span className="font-semibold text-text-dark dark:text-white">
+                        {selectedRate ? `$${getDisplayAmount(selectedRate).toFixed(2)}` : "Select shipping"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Tax</span>

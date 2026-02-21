@@ -571,9 +571,45 @@ export type CheckoutCartItem = {
   imageUrl?: string
 }
 
+export type ShippingAddress = {
+  name: string
+  company?: string
+  street1: string
+  street2?: string
+  city: string
+  state: string
+  zip: string
+  country: string
+  phone: string
+  email: string
+}
+
+export type ShippingRate = {
+  rateId: string
+  provider: string
+  carrierKey: string
+  serviceName: string
+  amount: string
+  baseAmount?: string
+  currency: string
+  estimatedDays: number | null
+  durationTerms: string
+  isMarkedUp?: boolean
+}
+
+export type OrderItem = {
+  productId?: string
+  name: string
+  price: number
+  quantity: number
+  imageUrl?: string
+  option?: string
+  note?: string
+}
+
 export const createCartCheckoutSession = async (
   items: CheckoutCartItem[],
-  options?: { successUrl?: string; cancelUrl?: string },
+  options?: { successUrl?: string; cancelUrl?: string; orderId?: string },
 ) => {
   const storeId = getConfiguredStoreId()
   if (!storeId) {
@@ -621,7 +657,13 @@ export const createCartCheckoutSession = async (
   const cancelUrl = options?.cancelUrl ?? `${window.location.origin}/cart?checkout=cancel`
   const createCheckout = httpsCallable(functions, "createCheckoutSessionForFrederick")
   try {
-    const response = await createCheckout({ storeId, successUrl, cancelUrl, items: normalizedItems })
+    const response = await createCheckout({
+      storeId,
+      successUrl,
+      cancelUrl,
+      items: normalizedItems,
+      orderId: options?.orderId,
+    })
     const payload = response.data as { url?: string }
     const url = typeof payload?.url === "string" ? payload.url : ""
     if (!url) {
@@ -652,6 +694,92 @@ export const createCartCheckoutSession = async (
     const composed = parts.length > 0 ? parts.join(" ") : "Stripe error while creating checkout session."
     const suffix = statusCode ? ` (Stripe status ${statusCode})` : ""
     throw new Error(`${composed}${suffix}`)
+  }
+}
+
+export const getShippingRatesForFrederick = async (toAddress: ShippingAddress) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const functions = getFunctionsClient()
+  if (!functions) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const getRates = httpsCallable(functions, "getShippingRatesForFrederick")
+  try {
+    const response = await getRates({ storeId, toAddress })
+    const payload = response.data as { shipmentId?: string; rates?: ShippingRate[] }
+    const shipmentId = typeof payload?.shipmentId === "string" ? payload.shipmentId : ""
+    const rates = Array.isArray(payload?.rates) ? payload.rates : []
+    if (!shipmentId || rates.length === 0) {
+      throw new Error("No shipping rates available for this address.")
+    }
+    return { shipmentId, rates }
+  } catch (error) {
+    const knownError = error as {
+      message?: string
+      code?: string
+      details?: Record<string, unknown>
+    }
+    const message = typeof knownError?.message === "string" ? knownError.message : ""
+    const details = knownError?.details ?? {}
+    const responseMessage =
+      details && typeof details === "object" && "message" in details && typeof details.message === "string"
+        ? details.message
+        : ""
+    const parts = [message, responseMessage].filter((part) => part && part.length > 0)
+    const composed = parts.length > 0 ? parts.join(" ") : "Unable to fetch shipping rates."
+    throw new Error(composed)
+  }
+}
+
+export const createOrderForFrederick = async (payload: {
+  items: OrderItem[]
+  customer: ShippingAddress
+  shipping: { selectedRateId: string; shipmentId?: string }
+}) => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const functions = getFunctionsClient()
+  if (!functions) {
+    throw new Error("Missing Firebase config env vars. Check VITE_FIREBASE_* in .env.")
+  }
+
+  const createOrder = httpsCallable(functions, "createOrderForFrederick")
+  try {
+    const response = await createOrder({
+      storeId,
+      items: payload.items,
+      customer: payload.customer,
+      shipping: payload.shipping,
+    })
+    const data = response.data as { orderId?: string }
+    const orderId = typeof data?.orderId === "string" ? data.orderId : ""
+    if (!orderId) {
+      throw new Error("Unable to create order.")
+    }
+    return orderId
+  } catch (error) {
+    const knownError = error as {
+      message?: string
+      code?: string
+      details?: Record<string, unknown>
+    }
+    const message = typeof knownError?.message === "string" ? knownError.message : ""
+    const details = knownError?.details ?? {}
+    const responseMessage =
+      details && typeof details === "object" && "message" in details && typeof details.message === "string"
+        ? details.message
+        : ""
+    const parts = [message, responseMessage].filter((part) => part && part.length > 0)
+    const composed = parts.length > 0 ? parts.join(" ") : "Unable to create order."
+    throw new Error(composed)
   }
 }
 
