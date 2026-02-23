@@ -25,7 +25,7 @@ function LandingPage() {
           }}
         >
           <div className="relative z-10 max-w-3xl flex flex-col gap-6 items-center animate-fade-in-up">
-            <span className="text-[#e5ded0] uppercase tracking-[0.2em] text-sm font-bold">Est. 1982 • Oregon, USA</span>
+            <span className="text-[#e5ded0] uppercase tracking-[0.2em] text-sm font-bold">Pacific Northwest to the Appalachian Mountains of West Virginia.</span>
             <h1 className="text-white text-5xl md:text-7xl font-black leading-tight tracking-tight drop-shadow-lg">
               Proudly Handcrafted <br /><span className="italic font-medium">in the USA</span>
             </h1>
@@ -158,7 +158,7 @@ function LandingPage() {
                 "The wood speaks to you. You just have to be quiet enough to listen."
               </p>
               <p className="text-[#160c1d]/80 dark:text-[#f7f5f8]/80 leading-relaxed">
-                With over 40 years of experience in bending wood to his will, Freddie brings a heritage of craftsmanship to every piece he touches. Starting in a small garage in Oregon, his dedication to the "old ways" has made Black Eagle bows sought after by traditional archers worldwide.
+                With over 40 years of experience in bending wood to his will, Freddie brings a heritage of craftsmanship to every piece he touches. Starting in a small garage in Pacific Northwest to the Appalachian Mountains of West Virginia, his dedication to the "old ways" has made Black Eagle bows sought after by traditional archers worldwide.
               </p>
               <div className="pt-4">
                 <Link

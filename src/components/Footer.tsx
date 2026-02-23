@@ -34,7 +34,7 @@ function Footer() {
         <div>
           <h4 className="font-bold mb-4 text-white">Contact</h4>
           <ul className="flex flex-col gap-2 text-sm text-white/70">
-            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">location_on</span> Bend, Oregon</li>
+            <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">location_on</span>Pacific Northwest to the Appalachian Mountains of West Virginia</li>
             <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">mail</span> info@blackeagle.com</li>
             <li className="flex items-center gap-2"><span className="material-symbols-outlined text-xs">call</span> (555) 123-4567</li>
           </ul>

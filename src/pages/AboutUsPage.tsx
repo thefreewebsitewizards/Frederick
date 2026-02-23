@@ -14,14 +14,14 @@ function AboutUsPage() {
       <main className="flex-grow flex flex-col items-center w-full">
         <div className="w-full max-w-[1200px] px-4 md:px-8 lg:px-12 py-8 flex flex-col gap-12">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center py-6">
-            <div className="w-full lg:w-1/2 aspect-[4/3] rounded-md overflow-hidden shadow-md relative group">
+            <div className="w-full lg:w-1/2 aspect-[3/4] rounded-md overflow-hidden shadow-md relative group">
               <div className="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors duration-500"></div>
               <div
                 className="w-full h-full bg-cover bg-center sepia-[0.2]"
                 data-alt="Freddie G the master bowyer working intently at his woodworking bench with hand tools"
                 style={{
                   backgroundImage:
-                    'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDopBOLp_e_HgjnJeRorfksjtmjyPoZbJTE3w0leUcaF-U-1I8h5LYbLPvTDKMFjfQ6-wjtceWCyJJFO5d7DZHZZyi2HigUP-kz82YgDj_Y5PpDuAjylhg6sg_Aojvb8h93GsB5QwH3SUN4pOapAsapCIZzg4qpoSxbRi1uxL7vZtZi5Iq1aEbQOBPNmENK-incpJg4L-1QfyGOpHjNHaRjrIFrrKiwxrJvdSoBFvKopQg003qANHnLxCfFiq2uAIT3YHuxPput_1c")',
+                    'url("Frederick-profile.jpg")',
                 }}
               ></div>
             </div>
