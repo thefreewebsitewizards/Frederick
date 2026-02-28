@@ -126,29 +126,32 @@ function ProductForm({ variant = "page", onClose, initialProduct }: ProductFormP
 
   const compressImage = async (file: File) => {
     const image = await loadImage(file)
-    const maxDimension = 1200
-    const ratio = Math.min(1, maxDimension / image.width, maxDimension / image.height)
-    const width = Math.max(1, Math.round(image.width * ratio))
-    const height = Math.max(1, Math.round(image.height * ratio))
-    const canvas = document.createElement("canvas")
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext("2d")
-    if (!context) {
-      throw new Error("Failed to process image file.")
-    }
-    context.drawImage(image, 0, 0, width, height)
+    const maxDimensions = [1200, 900, 700, 550]
+    const qualities = [0.82, 0.72, 0.62, 0.52, 0.42]
+    const targetChars = 220_000
 
-    const targetBytes = 1_048_487
-    const qualities = [0.9, 0.8, 0.7, 0.6, 0.5]
-    for (const quality of qualities) {
-      const dataUrl = canvas.toDataURL("image/jpeg", quality)
-      if (dataUrl.length <= targetBytes) {
-        return dataUrl
+    for (const maxDimension of maxDimensions) {
+      const ratio = Math.min(1, maxDimension / image.width, maxDimension / image.height)
+      const width = Math.max(1, Math.round(image.width * ratio))
+      const height = Math.max(1, Math.round(image.height * ratio))
+      const canvas = document.createElement("canvas")
+      canvas.width = width
+      canvas.height = height
+      const context = canvas.getContext("2d")
+      if (!context) {
+        throw new Error("Failed to process image file.")
+      }
+      context.drawImage(image, 0, 0, width, height)
+
+      for (const quality of qualities) {
+        const dataUrl = canvas.toDataURL("image/jpeg", quality)
+        if (dataUrl.length <= targetChars) {
+          return dataUrl
+        }
       }
     }
 
-    throw new Error('Image is too large. Please choose a smaller image or fewer images.')
+    throw new Error("Image is too large. Please choose a smaller image.")
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -226,6 +229,9 @@ function ProductForm({ variant = "page", onClose, initialProduct }: ProductFormP
         images: additionalImages,
         stockLevel: numericStock,
       })
+      if (JSON.stringify(product).length >= 950_000) {
+        throw new Error("Images are too large. Please upload fewer images or smaller files.")
+      }
       if (isEdit && initialProduct) {
         await updateStoreProduct(initialProduct.id, product)
       } else {

@@ -140,11 +140,11 @@ function LandingPage() {
           <div className="flex flex-col md:flex-row gap-10 items-center bg-white dark:bg-[#25162e] p-8 md:p-12 rounded-2xl shadow-lg border border-[#e5ded0] dark:border-[#3a2046]">
             <div className="w-full md:w-1/3 flex justify-center">
               <div
-                className="w-48 h-48 md:w-56 md:h-56 rounded-full bg-cover bg-center border-4 border-primary/20 shadow-inner"
-                data-alt="Portrait of an older craftsman in an apron working on a wooden bow"
+                className="w-48 h-48 md:w-56 md:h-56 rounded-full bg-cover bg-top border-4 border-primary/20 shadow-inner"
+                data-alt="Portrait of Freddie G."
                 style={{
                   backgroundImage:
-                    'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAFRTLd5n06aplfouL_9DImyiXM4c0HErsVa6BZGtZI3kcNYf-9kFDwG8Gt4qWSZJciFToYAf9s1K3gHTRfaL6acOg4HibtR4sdzdIlvkFL0myIC6NboPaAoj7cnDamHbw6YY6H1jT92uYRms5MqHYCzOeFpyln9-fk0ADzgrBG9cZZ8ezfb85RtCcxO3dcyJ_OB32cUe8BvbNCIVvQMwP1ktqc6bR8fdCfkhGrsriBxLcvBqjf0C96_YL056I0G0CPDW0XvLM6B2U")',
+                    'url("Frederick-profile.jpg")',
                 }}
               ></div>
             </div>
