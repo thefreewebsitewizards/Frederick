@@ -514,6 +514,38 @@ export const signOutFirebaseAdmin = async () => {
   await signOut(auth)
 }
 
+export const ensureStoreAdminClaims = async () => {
+  const storeId = getConfiguredStoreId()
+  if (!storeId) {
+    throw new Error("Missing VITE_STORE_ID. Set it in the Frederick .env file.")
+  }
+
+  const auth = getAuthClient()
+  const functions = getFunctionsClient()
+  if (!auth?.currentUser || !functions) {
+    throw new Error("Firebase is not configured. Check VITE_FIREBASE_* env vars.")
+  }
+
+  const bootstrap = httpsCallable(functions, "bootstrapAdminClaims")
+  try {
+    await bootstrap({ storeId })
+  } catch (error) {
+    const knownError = error as { message?: string; code?: string; details?: Record<string, unknown> }
+    const message = typeof knownError?.message === "string" ? knownError.message : ""
+    const details = knownError?.details ?? {}
+    const responseMessage =
+      details && typeof details === "object" && "message" in details && typeof details.message === "string"
+        ? details.message
+        : ""
+    const composed = [message, responseMessage].filter((part) => part && part.length > 0).join(" ")
+    if (!composed.toLowerCase().includes("admin already exists")) {
+      throw new Error(composed || "Unable to verify admin access.")
+    }
+  }
+
+  await auth.currentUser.getIdToken(true)
+}
+
 export const getStoreAdminEmail = async () => {
   const storeId = getConfiguredStoreId()
   if (!storeId) return null
@@ -605,6 +637,27 @@ export type OrderItem = {
   imageUrl?: string
   option?: string
   note?: string
+}
+
+export type Order = {
+  id: string
+  status: string
+  items: OrderItem[]
+  customer?: ShippingAddress
+  shipping?: {
+    selectedRateId?: string
+    shipmentId?: string
+    baseAmountCents?: number
+    markedUpAmountCents?: number
+    currency?: string
+    address?: ShippingAddress
+  }
+  createdAt?: string
+  updatedAt?: string
+  stripe?: {
+    checkoutSessionId?: string
+    paymentIntentId?: string | null
+  }
 }
 
 export const createCartCheckoutSession = async (
@@ -926,6 +979,32 @@ const readProductsSnapshot = (snapshot: QuerySnapshot<DocumentData>) => {
     .filter((product: Product) => product.name.trim().length > 0 && product.image.trim().length > 0)
 }
 
+const normalizeTimestamp = (value: unknown) => {
+  if (value && typeof value === "object" && "toDate" in value && typeof value.toDate === "function") {
+    return value.toDate().toISOString()
+  }
+  if (typeof value === "string") {
+    return value
+  }
+  return ""
+}
+
+const readOrdersSnapshot = (snapshot: QuerySnapshot<DocumentData>) => {
+  return snapshot.docs.map((docSnap: QueryDocumentSnapshot<DocumentData>) => {
+    const data = docSnap.data() as Partial<Order>
+    return {
+      id: docSnap.id,
+      status: typeof data.status === "string" ? data.status : "pending",
+      items: Array.isArray(data.items) ? (data.items as OrderItem[]) : [],
+      customer: data.customer,
+      shipping: data.shipping,
+      createdAt: normalizeTimestamp((data as { createdAt?: unknown }).createdAt),
+      updatedAt: normalizeTimestamp((data as { updatedAt?: unknown }).updatedAt),
+      stripe: data.stripe,
+    } satisfies Order
+  })
+}
+
 export const useStoreProducts = () => {
   const [remoteProducts, setRemoteProducts] = useState<Product[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -959,6 +1038,42 @@ export const useStoreProducts = () => {
     products: remoteProducts ?? [],
     error,
     loading: remoteProducts === null && error === null && Boolean(getConfiguredStoreId()) && Boolean(getFirestoreClient()),
+  }
+}
+
+export const useStoreOrders = () => {
+  const [remoteOrders, setRemoteOrders] = useState<Order[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const storeId = getConfiguredStoreId()
+    const firestore = getFirestoreClient()
+    if (!storeId || !firestore) {
+      return
+    }
+
+    const ordersRef = collection(firestore, "stores", storeId, "orders")
+    const ordersQuery = query(ordersRef, orderBy("createdAt", "desc"))
+
+    const unsubscribe = onSnapshot(
+      ordersQuery,
+      (snapshot) => {
+        setError(null)
+        setRemoteOrders(readOrdersSnapshot(snapshot))
+      },
+      (snapshotError) => {
+        setRemoteOrders(null)
+        setError(snapshotError instanceof Error ? snapshotError.message : "Failed to load orders.")
+      },
+    )
+
+    return () => unsubscribe()
+  }, [])
+
+  return {
+    orders: remoteOrders ?? [],
+    error,
+    loading: remoteOrders === null && error === null && Boolean(getConfiguredStoreId()) && Boolean(getFirestoreClient()),
   }
 }
 

@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react"
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { type Product, useStoreProduct } from "../data/products"
+import { type Product, useStoreProduct, useStoreProducts } from "../data/products"
 import { addToCart } from "../utils/cart"
 
 function ProductDetailsPage() {
@@ -41,9 +41,50 @@ function ProductDetailsPage() {
 function ProductDetailsContent({ product }: { product: Product }) {
   const navigate = useNavigate()
   const galleryImages = product.images.length > 0 ? product.images : [product.image]
+  const { products: storeProducts } = useStoreProducts()
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [selectedOption, setSelectedOption] = useState(() => product.drawWeightOptions[0] ?? "Standard")
+  const isStringProduct = product.category === "Strings"
+  const isBowProduct = product.category === "Recurve Bows" || product.category === "Longbows"
+  const bowModels = storeProducts.filter(
+    (item) => item.category === "Recurve Bows" || item.category === "Longbows",
+  )
+  const [baseModelId, setBaseModelId] = useState(product.id)
+  const baseModelName = (bowModels.find((model) => model.id === baseModelId) ?? product).name
+  const nockOptions = ["Horn", "Antler", "Self Nocks", "Maple", "Black Micarta"]
+  const gripOptions = ["Leather Wrap", "Buckskin", "Cord Wrap", "Suede", "No Wrap"]
+  const bowLengthOptions = ["58 in", "60 in", "62 in", "64 in", "66 in", "68 in", "70 in"]
+  const drawWeightOptions = product.drawWeightOptions.length > 0 ? product.drawWeightOptions : ["35 lbs", "40 lbs", "45 lbs", "50 lbs", "55 lbs", "60 lbs"]
+  const drawLengthOptions = ["26 in", "27 in", "28 in", "29 in", "30 in", "31 in"]
+  const [selectedNock, setSelectedNock] = useState(nockOptions[0])
+  const [selectedGrip, setSelectedGrip] = useState(gripOptions[0])
+  const [selectedBowLength, setSelectedBowLength] = useState(bowLengthOptions[2])
+  const [selectedDrawWeight, setSelectedDrawWeight] = useState(drawWeightOptions[0])
+  const [selectedDrawLength, setSelectedDrawLength] = useState(drawLengthOptions[2])
+  const stringColorOptions = [
+    { name: "Black", value: "#111827" },
+    { name: "Buckskin", value: "#E4CFA1" },
+    { name: "Green", value: "#0F766E" },
+    { name: "Dark Brown", value: "#4B2E1F" },
+    { name: "White", value: "#F8FAFC" },
+    { name: "Red", value: "#DC2626" },
+    { name: "Orange", value: "#F97316" },
+    { name: "Yellow", value: "#FACC15" },
+    { name: "Pink", value: "#EC4899" },
+    { name: "Purple", value: "#7C3AED" },
+    { name: "Blue", value: "#2563EB" },
+    { name: "Gray", value: "#9CA3AF" },
+  ]
+  const [primaryColor, setPrimaryColor] = useState(stringColorOptions[0])
+  const [secondaryColor, setSecondaryColor] = useState(stringColorOptions[2])
+  const [tertiaryColor, setTertiaryColor] = useState<(typeof stringColorOptions)[number] | null>(null)
+  const [loopStyle, setLoopStyle] = useState<"bare" | "served">("bare")
+  const [stringLength, setStringLength] = useState("")
+  const [specialRequest, setSpecialRequest] = useState("")
+  const servedLoopUpcharge = 5
+  const loopUpcharge = isStringProduct && loopStyle === "served" ? servedLoopUpcharge : 0
+  const displayPrice = product.price + loopUpcharge
   const themeStyle = {
     "--color-primary": "#7311d4",
     "--color-background-light": "#f7f6f8",
@@ -135,7 +176,14 @@ function ProductDetailsContent({ product }: { product: Product }) {
                   <h1 className="text-[#140d1b] tracking-tight text-4xl font-bold leading-tight mb-4 font-serif text-chocolate">
                     {product.name}
                   </h1>
-                  <p className="text-3xl font-medium text-chocolate mb-6">${product.price.toFixed(2)}</p>
+                  <div className="mb-6">
+                    <p className="text-3xl font-medium text-chocolate">${displayPrice.toFixed(2)}</p>
+                    {loopUpcharge > 0 ? (
+                      <p className="text-sm text-chocolate/70 mt-1">
+                        Base ${product.price.toFixed(2)} + ${servedLoopUpcharge.toFixed(2)} served loops
+                      </p>
+                    ) : null}
+                  </div>
                   <div className="rope-divider w-full mb-6"></div>
                   <p className="text-[#4a3b32] text-lg leading-relaxed mb-8 font-normal">{product.description}</p>
                   <div className="grid grid-cols-2 gap-4 mb-8">
@@ -185,27 +233,263 @@ function ProductDetailsContent({ product }: { product: Product }) {
                           </button>
                         </div>
                       </div>
-                      <div className="w-2/3">
-                        <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Draw Weight Option</label>
-                        <select
-                          className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
-                          onChange={(event) => setSelectedOption(event.target.value)}
-                          value={selectedOption}
-                        >
-                          {product.drawWeightOptions.map((option) => (
-                            <option key={option}>{option}</option>
-                          ))}
-                        </select>
-                      </div>
+                      {!isBowProduct ? (
+                        <div className="w-2/3">
+                          <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">
+                            {isStringProduct ? "Bow Length" : "Draw Weight Option"}
+                          </label>
+                          <select
+                            className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                            onChange={(event) => setSelectedOption(event.target.value)}
+                            value={selectedOption}
+                          >
+                            {product.drawWeightOptions.map((option) => (
+                              <option key={option}>{option}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : null}
                     </div>
+                    {isBowProduct ? (
+                      <div className="flex flex-col gap-5">
+                        <div>
+                          <p className="text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-2">Base Model</p>
+                          <select
+                            className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                            onChange={(event) => {
+                              const nextId = event.target.value
+                              setBaseModelId(nextId)
+                              if (nextId && nextId !== product.id) {
+                                navigate(`/products/${nextId}`)
+                              }
+                            }}
+                            value={baseModelId}
+                          >
+                            {[product, ...bowModels.filter((item) => item.id !== product.id)].map((model) => (
+                              <option key={model.id} value={model.id}>
+                                {model.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Nocks</label>
+                            <select
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                              onChange={(event) => setSelectedNock(event.target.value)}
+                              value={selectedNock}
+                            >
+                              {nockOptions.map((option) => (
+                                <option key={option}>{option}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Grip Material</label>
+                            <select
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                              onChange={(event) => setSelectedGrip(event.target.value)}
+                              value={selectedGrip}
+                            >
+                              {gripOptions.map((option) => (
+                                <option key={option}>{option}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Bow Length</label>
+                            <select
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                              onChange={(event) => setSelectedBowLength(event.target.value)}
+                              value={selectedBowLength}
+                            >
+                              {bowLengthOptions.map((option) => (
+                                <option key={option}>{option}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Draw Weight</label>
+                            <select
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                              onChange={(event) => setSelectedDrawWeight(event.target.value)}
+                              value={selectedDrawWeight}
+                            >
+                              {drawWeightOptions.map((option) => (
+                                <option key={option}>{option}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Draw Length</label>
+                            <select
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2"
+                              onChange={(event) => setSelectedDrawLength(event.target.value)}
+                              value={selectedDrawLength}
+                            >
+                              {drawLengthOptions.map((option) => (
+                                <option key={option}>{option}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                    {isStringProduct ? (
+                      <div className="flex flex-col gap-5">
+                        <div>
+                          <p className="text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-2">Loop Style</p>
+                          <div className="flex gap-3">
+                            <button
+                              className={`flex-1 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                                loopStyle === "bare"
+                                  ? "border-primary bg-primary/10 text-chocolate"
+                                  : "border-[#e3dac9] bg-[#f5f1e8] text-chocolate/70 hover:text-chocolate"
+                              }`}
+                              onClick={() => setLoopStyle("bare")}
+                              type="button"
+                            >
+                              Regular - Flemish Loops
+                            </button>
+                            <button
+                              className={`flex-1 rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                                loopStyle === "served"
+                                  ? "border-primary bg-primary/10 text-chocolate"
+                                  : "border-[#e3dac9] bg-[#f5f1e8] text-chocolate/70 hover:text-chocolate"
+                              }`}
+                              onClick={() => setLoopStyle("served")}
+                              type="button"
+                            >
+                              Invincible - Served Loops (+${servedLoopUpcharge.toFixed(2)})
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-2">Color #1</p>
+                          <div className="grid grid-cols-6 gap-2">
+                            {stringColorOptions.map((color) => {
+                              const isSelected = primaryColor.name === color.name
+                              return (
+                                <button
+                                  key={`primary-${color.name}`}
+                                  className={`h-10 rounded-md border transition ${
+                                    isSelected ? "border-primary ring-2 ring-primary/40" : "border-[#e3dac9]"
+                                  }`}
+                                  onClick={() => setPrimaryColor(color)}
+                                  style={{ backgroundColor: color.value }}
+                                  title={color.name}
+                                  type="button"
+                                />
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-2">Color #2</p>
+                          <div className="grid grid-cols-6 gap-2">
+                            {stringColorOptions.map((color) => {
+                              const isSelected = secondaryColor.name === color.name
+                              return (
+                                <button
+                                  key={`secondary-${color.name}`}
+                                  className={`h-10 rounded-md border transition ${
+                                    isSelected ? "border-primary ring-2 ring-primary/40" : "border-[#e3dac9]"
+                                  }`}
+                                  onClick={() => setSecondaryColor(color)}
+                                  style={{ backgroundColor: color.value }}
+                                  title={color.name}
+                                  type="button"
+                                />
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-bold text-chocolate/60 uppercase tracking-wider mb-2">
+                              Optional Extra Color
+                            </p>
+                            <button
+                              className="text-xs font-semibold text-primary hover:underline"
+                              onClick={() => setTertiaryColor(null)}
+                              type="button"
+                            >
+                              No third color
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-6 gap-2">
+                            {stringColorOptions.map((color) => {
+                              const isSelected = tertiaryColor?.name === color.name
+                              return (
+                                <button
+                                  key={`tertiary-${color.name}`}
+                                  className={`h-10 rounded-md border transition ${
+                                    isSelected ? "border-primary ring-2 ring-primary/40" : "border-[#e3dac9]"
+                                  }`}
+                                  onClick={() => setTertiaryColor(color)}
+                                  style={{ backgroundColor: color.value }}
+                                  title={color.name}
+                                  type="button"
+                                />
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">
+                              Actual Bow String Length
+                            </label>
+                            <input
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2 px-3"
+                              onChange={(event) => setStringLength(event.target.value)}
+                              placeholder="Enter bowstring length"
+                              value={stringLength}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-chocolate/60 uppercase mb-2">Special Request</label>
+                            <input
+                              className="w-full border-[#e3dac9] bg-[#f5f1e8] text-chocolate focus:ring-primary focus:border-primary rounded py-2 px-3"
+                              onChange={(event) => setSpecialRequest(event.target.value)}
+                              placeholder="Optional"
+                              value={specialRequest}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                     <button
                       className="mt-4 flex w-full cursor-pointer items-center justify-center rounded-lg h-14 bg-primary hover:bg-[#600eb3] text-white gap-3 text-lg font-bold leading-normal tracking-wide shadow-md transition-all transform hover:-translate-y-0.5"
                       onClick={() => {
+                        const optionParts = isStringProduct
+                          ? [
+                              selectedOption ? `Length: ${selectedOption}` : null,
+                              `Primary: ${primaryColor.name}`,
+                              `Secondary: ${secondaryColor.name}`,
+                              tertiaryColor ? `Tertiary: ${tertiaryColor.name}` : null,
+                              loopStyle === "served" ? "Loop: Served" : "Loop: Bare",
+                              stringLength.trim() ? `Actual Length: ${stringLength.trim()}` : null,
+                              specialRequest.trim() ? `Request: ${specialRequest.trim()}` : null,
+                            ].filter((part): part is string => Boolean(part))
+                          : isBowProduct
+                            ? [
+                                `Model: ${baseModelName}`,
+                                selectedNock ? `Nocks: ${selectedNock}` : null,
+                                selectedGrip ? `Grip: ${selectedGrip}` : null,
+                                selectedBowLength ? `Bow Length: ${selectedBowLength}` : null,
+                                selectedDrawWeight ? `Draw Weight: ${selectedDrawWeight}` : null,
+                                selectedDrawLength ? `Draw Length: ${selectedDrawLength}` : null,
+                              ].filter((part): part is string => Boolean(part))
+                            : [selectedOption].filter((part): part is string => Boolean(part))
+                        const optionLabel = optionParts.join(" • ")
                         addToCart({
                           productId: product.id,
                           quantity,
-                          option: selectedOption,
-                          note: product.summary,
+                          option: optionLabel,
+                          note: specialRequest.trim() || product.summary,
+                          priceAdjustment: loopUpcharge,
                         })
                         navigate("/cart")
                       }}

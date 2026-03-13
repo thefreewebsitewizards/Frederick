@@ -5,6 +5,7 @@ export type CartItem = {
   quantity: number
   option?: string
   note?: string
+  priceAdjustment?: number
 }
 
 const storageKey = "black-eagle-cart"
@@ -60,6 +61,7 @@ export const addToCart = (item: CartItem) => {
       ...existing,
       quantity: existing.quantity + item.quantity,
       note: item.note ?? existing.note,
+      priceAdjustment: item.priceAdjustment ?? existing.priceAdjustment,
     }
     const next = [...items]
     next[existingIndex] = merged

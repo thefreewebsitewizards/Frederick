@@ -49,7 +49,8 @@ function CartPage() {
         const product = productMap.get(item.productId)
         const title = product?.name ?? "Unavailable item"
         const image = product?.image ?? ""
-        const price = product?.price ?? 0
+        const priceAdjustment = item.priceAdjustment ?? 0
+        const price = (product?.price ?? 0) + priceAdjustment
         const option = item.option ?? ""
         const note = item.note ?? ""
         const detail = option || note || product?.summary || ""
