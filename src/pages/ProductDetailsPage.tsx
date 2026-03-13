@@ -260,7 +260,7 @@ function ProductDetailsContent({ product }: { product: Product }) {
                               const nextId = event.target.value
                               setBaseModelId(nextId)
                               if (nextId && nextId !== product.id) {
-                                navigate(`/products/${nextId}`)
+                                navigate(`/product-details/${nextId}`)
                               }
                             }}
                             value={baseModelId}
@@ -361,7 +361,7 @@ function ProductDetailsContent({ product }: { product: Product }) {
                               onClick={() => setLoopStyle("served")}
                               type="button"
                             >
-                              Invincible - Served Loops (+${servedLoopUpcharge.toFixed(2)})
+                              Served Loops (+${servedLoopUpcharge.toFixed(2)})
                             </button>
                           </div>
                         </div>
