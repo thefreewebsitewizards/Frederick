@@ -21,7 +21,6 @@ function Navbar() {
           <Link className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors" to="/products">Shop</Link>
           <Link className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors" to="/about">About Freddie</Link>
           <Link className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors" to="/contact">Contact</Link>
-          <Link className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors" to="/admin">Admin</Link>
         </nav>
         <div className="flex items-center gap-4">
           <button
@@ -71,13 +70,6 @@ function Navbar() {
               to="/contact"
             >
               Contact
-            </Link>
-            <Link
-              className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-              to="/admin"
-            >
-              Admin
             </Link>
             <Link
               className="text-[#160c1d] dark:text-[#e0e0e0] text-base font-medium hover:text-primary dark:hover:text-primary transition-colors"
